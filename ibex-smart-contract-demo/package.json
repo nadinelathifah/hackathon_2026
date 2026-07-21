@@ -1,0 +1,32 @@
+{
+  "name": "ibex-smart-contract-demo",
+  "version": "1.0.0",
+  "description": "Ibex Credit smart contract demo using Polygon as a tamper-evident audit layer for ML-generated credit score proofs.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "demo": "hardhat run scripts/demoLocalFlow.js",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network amoy",
+    "submit:amoy": "hardhat run scripts/submitScoreRoot.js --network amoy",
+    "read:amoy": "hardhat run scripts/readLatestRecord.js --network amoy",
+    "verify:amoy": "hardhat run scripts/verifyScoreEvent.js --network amoy",
+    "wallet:amoy": "hardhat run scripts/checkWallet.js --network amoy",
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
+    "submit:polygon": "hardhat run scripts/submitScoreRoot.js --network polygon",
+    "read:polygon": "hardhat run scripts/readLatestRecord.js --network polygon",
+    "verify:polygon": "hardhat run scripts/verifyScoreEvent.js --network polygon",
+    "wallet:polygon": "hardhat run scripts/checkWallet.js --network polygon"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.0.2",
+    "dotenv": "16.4.7",
+    "ethers": "6.14.0",
+    "merkletreejs": "0.3.11"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "5.0.0",
+    "hardhat": "2.28.0"
+  }
+}
