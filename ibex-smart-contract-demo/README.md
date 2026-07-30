@@ -2,6 +2,8 @@
 
 Ibex Credit is a universal credit rating platform for internationals in the UK. This demo shows how Ibex can use Polygon as a tamper-evident audit layer for ML-generated credit score updates without putting personal or financial data on-chain.
 
+For a simple laptop-to-Polygon walkthrough, see [`TEAMMATE_SMART_CONTRACT_GUIDE.md`](./TEAMMATE_SMART_CONTRACT_GUIDE.md).
+
 The demo contract is deployed on **Polygon PoS mainnet**. It has also been exercised with a mock credit score event whose proof was submitted, read back, and successfully verified against the original off-chain event.
 
 Ibex uses Polygon as a tamper-evident audit layer. The ML-generated score and user financial data remain off-chain. When a score is generated or updated, the backend creates a score event hash and Merkle root. The smart contract stores those proofs on Polygon. Later, anyone with permission to view the off-chain record can recompute the hash and verify that the score event has not been changed.
