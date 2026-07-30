@@ -1,6 +1,7 @@
 const hre = require("hardhat");
 const { hashScoreEvent } = require("../utils/hashScoreEvent");
 const { createMerkleRoot } = require("../utils/createMerkleRoot");
+const { loadScoreEvent } = require("../utils/loadScoreEvent");
 
 function sameHash(left, right) {
   return left.toLowerCase() === right.toLowerCase();
@@ -15,15 +16,20 @@ async function main() {
 
   await registry.waitForDeployment();
 
+  const { scoreEvent, userSalt, source, isCustomEvent } = loadScoreEvent();
   const {
     scoreEventHash,
     userHash,
     modelVersionHash
-  } = hashScoreEvent();
+  } = hashScoreEvent(scoreEvent, userSalt);
 
   const { merkleRoot, proof, leaf } = createMerkleRoot(scoreEventHash);
 
-  console.log("1. Mock score event created off-chain");
+  console.log(
+    isCustomEvent
+      ? `1. Score event loaded off-chain from: ${source}`
+      : "1. Mock score event created off-chain"
+  );
   console.log(`2. userHash generated: ${userHash}`);
   console.log(`3. scoreEventHash generated: ${scoreEventHash}`);
   console.log(`4. modelVersionHash generated: ${modelVersionHash}`);

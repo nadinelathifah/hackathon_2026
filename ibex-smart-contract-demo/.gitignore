@@ -1,5 +1,7 @@
 node_modules/
 .env
+score-event.json
+score-events/
 coverage/
 artifacts/
 cache/

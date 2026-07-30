@@ -1,6 +1,7 @@
 const hre = require("hardhat");
 const { hashScoreEvent } = require("../utils/hashScoreEvent");
 const { createMerkleRoot } = require("../utils/createMerkleRoot");
+const { loadScoreEvent } = require("../utils/loadScoreEvent");
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -20,9 +21,16 @@ async function main() {
   const contractAddress = requireEnv("SCORE_AUDIT_CONTRACT_ADDRESS");
   const registry = await hre.ethers.getContractAt("ScoreAuditRegistry", contractAddress);
 
-  const { userHash, scoreEventHash, modelVersionHash } = hashScoreEvent();
+  const { scoreEvent, userSalt, source } = loadScoreEvent();
+  const { userHash, scoreEventHash, modelVersionHash } = hashScoreEvent(
+    scoreEvent,
+    userSalt
+  );
   const { merkleRoot, proof, leaf } = createMerkleRoot(scoreEventHash);
   const latestRecord = await registry.latestRecordByUserHash(userHash);
+
+  console.log(`Score event source: ${source}`);
+  console.log(`userHash: ${userHash}`);
 
   const proofValid = await registry.verifyScoreEvent(proof, latestRecord.merkleRoot, leaf);
   const valuesMatch =

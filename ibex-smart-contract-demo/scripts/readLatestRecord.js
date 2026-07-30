@@ -1,5 +1,6 @@
 const hre = require("hardhat");
 const { hashScoreEvent } = require("../utils/hashScoreEvent");
+const { loadScoreEvent } = require("../utils/loadScoreEvent");
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -23,8 +24,13 @@ async function main() {
   const contractAddress = requireEnv("SCORE_AUDIT_CONTRACT_ADDRESS");
   const registry = await hre.ethers.getContractAt("ScoreAuditRegistry", contractAddress);
 
-  const { userHash: defaultUserHash } = hashScoreEvent();
-  const userHash = process.env.USER_HASH || defaultUserHash;
+  let userHash = process.env.USER_HASH;
+
+  if (!userHash) {
+    const { scoreEvent, userSalt } = loadScoreEvent();
+    userHash = hashScoreEvent(scoreEvent, userSalt).userHash;
+  }
+
   const latestRecord = await registry.latestRecordByUserHash(userHash);
 
   console.log("\nLatest score audit record:");

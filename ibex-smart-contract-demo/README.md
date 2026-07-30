@@ -172,6 +172,50 @@ No personal data was stored on-chain.
 Only hashes, Merkle root, timestamp, and issuer address were stored.
 ```
 
+## Use An ML-Generated Score Event
+
+The local demo, Polygon submission, read, and verification scripts can use a JSON event produced by a machine-learning service. If `SCORE_EVENT_FILE` is not configured, they continue to use the built-in mock event.
+
+Start from the included example:
+
+```bash
+cp examples/score-event.example.json score-event.json
+```
+
+`score-event.json` is ignored by Git because a real event can contain private score information. The `.pkl` model, raw financial data, and ML features must also remain off-chain and outside Git.
+
+The custom JSON must include at least:
+
+```text
+userId
+newScore
+timestamp
+modelVersion
+```
+
+It may include the score band, confidence, previous score, and positive or negative factors. The complete JSON object is canonicalised and hashed, so verification must use the exact same file.
+
+Generate a private user salt:
+
+```bash
+openssl rand -hex 32
+```
+
+Add the event path and generated salt to `.env`:
+
+```text
+SCORE_EVENT_FILE=./score-event.json
+USER_SALT=your_generated_secret_salt
+```
+
+Do not commit either the real event or its salt. Test the ML event locally without a wallet or gas:
+
+```bash
+npm run demo
+```
+
+The first output line should confirm that the event was loaded from `score-event.json`, and the final result should be `VALID`.
+
 ## Deploy To Polygon Mainnet
 
 Polygon mainnet uses real POL for gas. Use a dedicated deployment wallet that you intentionally fund, and never paste its private key into chat or commit it to git. The project `.gitignore` excludes `.env`.
@@ -189,6 +233,9 @@ PRIVATE_KEY=your_polygon_wallet_private_key
 POLYGON_RPC_URL=https://polygon.drpc.org
 SCORE_AUDIT_CONTRACT_ADDRESS=
 POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
+SCORE_EVENT_FILE=
+USER_SALT=
+ISSUER_ADDRESS=
 ```
 
 `PRIVATE_KEY` must be the private key for the funded deployment account, not its public `0x...` wallet address. The selected network in the MetaMask interface does not control these scripts; Hardhat connects to Polygon mainnet using `POLYGON_RPC_URL` and chain ID `137`.
@@ -249,6 +296,26 @@ npm run verify:polygon
 
 Every later call to `npm run submit:polygon` creates another real Polygon mainnet transaction and spends a small amount of POL. For the same `userHash`, the contract updates `latestRecordByUserHash`; the earlier transactions remain permanently visible in Polygon's transaction history.
 
+## Approve Another Issuer Wallet
+
+Only an approved issuer can submit score proofs. A teammate should send the contract owner only their public wallet address. They must never share their private key.
+
+On the contract owner's laptop, set the teammate's public address in `.env`:
+
+```text
+ISSUER_ADDRESS=0xTeammatePublicWalletAddress
+```
+
+Make sure `PRIVATE_KEY` still belongs to the current contract owner, then run:
+
+```bash
+npm run add-issuer:polygon
+```
+
+The script checks that the configured signer is the contract owner, submits `addIssuer`, and prints the PolygonScan transaction link. If the address is already approved, it exits without spending gas.
+
+After approval, the teammate uses their own `.env`, private key, and POL balance to submit proofs. The owner's private key never needs to leave the owner's laptop.
+
 ## Optional Polygon Amoy Deployment
 
 Amoy remains configured as an optional testnet. It is not required to reproduce the live mainnet deployment described above.
@@ -279,6 +346,8 @@ Submit to the live Polygon mainnet deployment:
 npm run submit:polygon
 ```
 
+When `SCORE_EVENT_FILE` and `USER_SALT` are set, this submits the ML-generated event's hashes. The script prints the derived `userHash`, event hash, model hash, Merkle root, and Polygon transaction link. It never submits the JSON content itself.
+
 To use the optional Amoy deployment instead:
 
 ```bash
@@ -295,7 +364,7 @@ PolygonScan link: https://amoy.polygonscan.com/tx/0x...
 
 ## Read The Latest Score Record
 
-Read the latest record for the demo user from Polygon mainnet:
+Read the latest record for the configured score event from Polygon mainnet:
 
 ```bash
 npm run read:polygon
@@ -312,7 +381,7 @@ timestamp: ...
 issuer: 0x...
 ```
 
-To read another user hash, set `USER_HASH` when running the script:
+When `SCORE_EVENT_FILE` and `USER_SALT` are configured, the script derives the same `userHash` automatically. To read another user hash directly, set `USER_HASH` when running the script:
 
 ```bash
 USER_HASH=0x... npm run read:polygon
@@ -320,7 +389,7 @@ USER_HASH=0x... npm run read:polygon
 
 ## Verify A Score Proof
 
-Verify that the off-chain mock score event still matches the on-chain proof:
+Verify that the configured off-chain score event still matches the on-chain proof:
 
 ```bash
 npm run verify:polygon
@@ -372,6 +441,7 @@ ibex-smart-contract-demo/
     ScoreAuditRegistry.sol
 
   scripts/
+    addIssuer.js
     checkWallet.js
     deploy.js
     demoLocalFlow.js
@@ -385,4 +455,8 @@ ibex-smart-contract-demo/
   utils/
     hashScoreEvent.js
     createMerkleRoot.js
+    loadScoreEvent.js
+
+  examples/
+    score-event.example.json
 ```
