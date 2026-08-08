@@ -1,7 +1,7 @@
-const { hashScoreEvent } = require("../../utils/hashScoreEvent");
-const { createMerkleRoot } = require("../../utils/createMerkleRoot");
-const { loadScoreEvent } = require("../../utils/loadScoreEvent");
-const { formatScorePeriod, resolveScorePeriod } = require("../../utils/scorePeriod");
+const { hashScoreEvent } = require("../utils/hashScoreEvent");
+const { createMerkleRoot } = require("../utils/createMerkleRoot");
+const { loadScoreEvent } = require("../utils/loadScoreEvent");
+const { formatScorePeriod, resolveScorePeriod } = require("../utils/scorePeriod");
 const { getRegistry, sameHash } = require("./helpers");
 
 async function main() {

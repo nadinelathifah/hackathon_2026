@@ -1,25 +1,25 @@
 {
-  "name": "ibex-smart-contract-demo",
-  "version": "1.0.0",
-  "description": "Ibex Credit smart contract demo using Polygon as a tamper-evident audit layer for ML-generated credit score proofs.",
+  "name": "ibex-smart-contract-demo-v2",
+  "version": "2.0.0",
+  "description": "Protected V2 of the Ibex Credit Polygon score audit registry.",
   "private": true,
   "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "demo": "hardhat run scripts/demoLocalFlow.js",
+    "wallet:amoy": "hardhat run scripts/checkWallet.js --network amoy",
     "deploy:amoy": "hardhat run scripts/deploy.js --network amoy",
-    "add-issuer:amoy": "hardhat run scripts/addIssuer.js --network amoy",
     "submit:amoy": "hardhat run scripts/submitScoreRoot.js --network amoy",
     "read:amoy": "hardhat run scripts/readLatestRecord.js --network amoy",
     "verify:amoy": "hardhat run scripts/verifyScoreEvent.js --network amoy",
-    "wallet:amoy": "hardhat run scripts/checkWallet.js --network amoy",
+    "admin:amoy": "hardhat run scripts/manageRegistry.js --network amoy",
+    "wallet:polygon": "hardhat run scripts/checkWallet.js --network polygon",
     "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
-    "add-issuer:polygon": "hardhat run scripts/addIssuer.js --network polygon",
     "submit:polygon": "hardhat run scripts/submitScoreRoot.js --network polygon",
     "read:polygon": "hardhat run scripts/readLatestRecord.js --network polygon",
     "verify:polygon": "hardhat run scripts/verifyScoreEvent.js --network polygon",
-    "wallet:polygon": "hardhat run scripts/checkWallet.js --network polygon"
+    "admin:polygon": "hardhat run scripts/manageRegistry.js --network polygon"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.0.2",

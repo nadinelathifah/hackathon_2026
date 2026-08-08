@@ -1,0 +1,16 @@
+{
+  "userId": "ibex-test-user-002",
+  "previousScore": 690,
+  "newScore": 735,
+  "scoreBand": "Low Risk",
+  "confidence": 0.82,
+  "timestamp": "2026-07-30T14:00:00.000Z",
+  "modelVersion": "ibex-credit-model-v1.0",
+  "positiveFactors": [
+    "Stable income deposits",
+    "Rent paid consistently"
+  ],
+  "negativeFactors": [
+    "Short UK financial history"
+  ]
+}

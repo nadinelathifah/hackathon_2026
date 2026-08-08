@@ -1,7 +1,7 @@
 const hre = require("hardhat");
-const { hashScoreEvent } = require("../../utils/hashScoreEvent");
-const { loadScoreEvent } = require("../../utils/loadScoreEvent");
-const { formatScorePeriod } = require("../../utils/scorePeriod");
+const { hashScoreEvent } = require("../utils/hashScoreEvent");
+const { loadScoreEvent } = require("../utils/loadScoreEvent");
+const { formatScorePeriod } = require("../utils/scorePeriod");
 const { formatTimestamp, getRegistry } = require("./helpers");
 
 async function main() {

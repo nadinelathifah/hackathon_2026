@@ -61,13 +61,14 @@ The V1 blockchain demonstration is complete and running on Polygon PoS mainnet. 
 | Demonstration proof transaction | [`0x4bc2b88411bd4d207d397d8fde35d8a31a6176c1ec9a51f5e50df852b70276e4`](https://polygonscan.com/tx/0x4bc2b88411bd4d207d397d8fde35d8a31a6176c1ec9a51f5e50df852b70276e4) |
 | Verification result | `VALID` |
 
-The contract project currently exists at:
+The contract versions are separate standalone projects:
 
 ```text
-ibex-smart-contract-demo/
+ibex-smart-contract-demo/       # V1, currently deployed
+ibex-smart-contract-demo-v2/    # V2, not yet deployed
 ```
 
-It includes both Solidity contract versions, hashing and Merkle utilities, V1 and V2 deployment/operation scripts, local demonstrations, and 42 passing tests.
+Each folder has its own package files, contract, scripts, utilities, tests, environment example, and README. V1 has 15 passing tests and V2 has 33 passing tests.
 
 The website, API, Python model service, PostgreSQL schema, anchoring worker, and Docker deployment still need to be implemented for the complete live MVP.
 
@@ -445,7 +446,7 @@ submitScoreRoot(
 
 The contract does not receive a score, feature vector, identity record, or model artifact.
 
-The repository also includes `ScoreAuditRegistryV2`. V2 adds:
+The separate `ibex-smart-contract-demo-v2` project contains `ScoreAuditRegistryV2`. V2 adds:
 
 - strictly newer `YYYYMM` score periods for each stable `userHash`;
 - a 28-day minimum interval between successful updates for the same user hash;
@@ -522,13 +523,12 @@ npm install
 npm run compile
 npm run test
 npm run demo
-npm run demo:v2
 ```
 
 Expected test result:
 
 ```text
-9 passing
+15 passing
 ```
 
 Expected demonstration result:
@@ -570,8 +570,6 @@ Create `.env` from `.env.example` and set:
 PRIVATE_KEY=your_polygon_issuer_private_key
 POLYGON_RPC_URL=https://polygon.drpc.org
 SCORE_AUDIT_CONTRACT_ADDRESS=0xD3da53b74Ce4d79d05D902059F8CC9Ec2a31e534
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=
-V2_DAILY_ISSUER_LIMIT=1000
 POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
 ```
 
@@ -600,17 +598,40 @@ Every `submit:polygon` call spends POL. The latest mapping record is replaced fo
 
 Polygon Amoy remains configured as an optional testnet, but the current project was actually deployed and demonstrated on Polygon mainnet.
 
-V2 must use a new address. After local tests and review, its deployment flow is:
+V2 must use a new address. Open its separate project after local V1 testing:
 
 ```bash
+cd ../ibex-smart-contract-demo-v2
+npm install
 npm run compile
 npm run test
-npm run demo:v2
-npm run wallet:polygon
-npm run deploy:v2:polygon
+npm run demo
 ```
 
-Copy the resulting address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. V2 submission, reading, and verification use `submit:v2:polygon`, `read:v2:polygon`, and `verify:v2:polygon`. V2 has not been deployed merely because these commands and scripts exist.
+Expected V2 test result:
+
+```text
+33 passing
+```
+
+Create a separate `.env` inside the V2 folder:
+
+```text
+PRIVATE_KEY=your_polygon_issuer_private_key
+POLYGON_RPC_URL=https://polygon.drpc.org
+SCORE_AUDIT_V2_CONTRACT_ADDRESS=
+V2_DAILY_ISSUER_LIMIT=1000
+POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
+```
+
+After review, its mainnet deployment flow is:
+
+```bash
+npm run wallet:polygon
+npm run deploy:polygon
+```
+
+Copy the resulting address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. Inside the V2 folder, submission, reading, and verification use `submit:polygon`, `read:polygon`, and `verify:polygon`. V2 has not been deployed merely because these commands and scripts exist.
 
 ## 15. Contract Hardening Before a Real-User Pilot
 
