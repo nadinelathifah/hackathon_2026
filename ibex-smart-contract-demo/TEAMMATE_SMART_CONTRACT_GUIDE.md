@@ -64,6 +64,8 @@ Polygon timestamp
 issuer wallet address
 ```
 
+V2 also records a non-personal monthly period such as `202608` and minimal counters used to enforce anti-abuse limits. It still never receives the score-event JSON or financial data.
+
 ## 3. Current Polygon Contract
 
 The Ibex demonstration contract is already deployed on Polygon PoS mainnet.
@@ -88,11 +90,24 @@ The current contract owner is:
 
 Only the owner can approve or remove issuer wallets. An approved issuer can submit score proofs but cannot control the contract.
 
-The current contract does not support ownership transfer.
+This address is the V1 contract. V1 does not support ownership transfer. The repository now also contains `ScoreAuditRegistryV2`, which adds monthly submission protection, duplicate prevention, issuer quotas, emergency pausing, and safe two-step ownership transfer. V2 has not yet been deployed to Polygon mainnet, so do not use the V1 address with V2 scripts.
+
+## How The User And Website Interact
+
+The user does not call the Polygon write function directly. They sign in to the Ibex website and request or view their monthly score. The backend authenticates the user, checks the database for an existing score in that month, runs the model, stores the complete event privately, and places one proof submission in a queue.
+
+An approved backend issuer wallet signs that queued Polygon transaction. The website never receives the issuer private key. The score shown to the user comes from the private database; Polygon provides a timestamped proof that the underlying event has not changed.
+
+```text
+User -> website -> authenticated backend -> ML model and private database
+                                      -> proof queue -> issuer wallet -> Polygon
+```
+
+Website account bans, request throttling, and duplicate-job prevention happen in the backend. V2 independently rejects repeated score periods, updates inside its 28-day cooldown, reused event hashes, and submissions above an issuer's daily allowance.
 
 ## 4. Install The Project
 
-Use Node.js 20 LTS. Avoid Node.js 25 because Hardhat reports it as unsupported.
+Use Node.js 20 LTS or Node.js 22 LTS. Avoid Node.js 25 because Hardhat reports it as unsupported.
 
 Clone the team repository:
 
@@ -124,7 +139,7 @@ npm run test
 Expected result:
 
 ```text
-15 passing
+42 passing
 ```
 
 ## 5. Create The Score Event
@@ -506,7 +521,7 @@ Confirm that:
 
 ### Hardhat reports an unsupported Node.js version
 
-Install and use Node.js 20 LTS.
+Install and use Node.js 20 LTS or Node.js 22 LTS.
 
 ## 16. Security Checklist
 
@@ -521,6 +536,8 @@ Before every Polygon submission, confirm:
 - chain ID is `137`;
 - the contract address is correct; and
 - the local demo returns `VALID`.
+- the website API authenticated and rate-limited the request; and
+- the issuer private key was never exposed to the website or browser.
 
 ## 17. Command Summary
 
@@ -555,6 +572,52 @@ npm run submit:polygon
 npm run read:polygon
 npm run verify:polygon
 ```
+
+## 18. V2 Protected Contract Commands
+
+V2 must be deployed to a new address. Run its local demo first:
+
+```bash
+npm run compile
+npm run test
+npm run demo:v2
+```
+
+Before a real deployment, set a planned daily issuer limit in `.env`:
+
+```text
+V2_DAILY_ISSUER_LIMIT=1000
+SCORE_AUDIT_V2_CONTRACT_ADDRESS=
+```
+
+Deploying spends real POL:
+
+```bash
+npm run wallet:polygon
+npm run deploy:v2:polygon
+```
+
+Put the new address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. Do not put the existing V1 address there. V2 operations then use:
+
+```bash
+npm run submit:v2:polygon
+npm run read:v2:polygon
+npm run verify:v2:polygon
+```
+
+The score period comes from the JSON timestamp. It can be set explicitly as `SCORE_PERIOD=202608`. Keep the same private `USER_SALT` so a user receives the same stable `userHash` each month.
+
+The V2 owner can manage safeguards with:
+
+```bash
+V2_ADMIN_ACTION=add-issuer npm run admin:v2:polygon
+V2_ADMIN_ACTION=remove-issuer npm run admin:v2:polygon
+V2_ADMIN_ACTION=pause npm run admin:v2:polygon
+V2_ADMIN_ACTION=unpause npm run admin:v2:polygon
+V2_DAILY_ISSUER_LIMIT=1500 V2_ADMIN_ACTION=set-daily-limit npm run admin:v2:polygon
+```
+
+See `README.md` for the two-step ownership transfer commands and full V2 explanation.
 
 ## Final Summary
 
