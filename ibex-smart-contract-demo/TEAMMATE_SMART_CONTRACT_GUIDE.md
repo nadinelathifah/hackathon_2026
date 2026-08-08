@@ -2,6 +2,8 @@
 
 This guide explains, in simple terms, how to connect the Ibex machine-learning score output to the smart contract.
 
+This guide and folder cover V1 only. The protected V2 project has its own documentation in [`../ibex-smart-contract-demo-v2`](../ibex-smart-contract-demo-v2/README.md).
+
 It covers:
 
 1. Running the project on your laptop.
@@ -64,8 +66,6 @@ Polygon timestamp
 issuer wallet address
 ```
 
-V2 also records a non-personal monthly period such as `202608` and minimal counters used to enforce anti-abuse limits. It still never receives the score-event JSON or financial data.
-
 ## 3. Current Polygon Contract
 
 The Ibex demonstration contract is already deployed on Polygon PoS mainnet.
@@ -90,7 +90,7 @@ The current contract owner is:
 
 Only the owner can approve or remove issuer wallets. An approved issuer can submit score proofs but cannot control the contract.
 
-This address is the V1 contract. V1 does not support ownership transfer. The repository now also contains `ScoreAuditRegistryV2`, which adds monthly submission protection, duplicate prevention, issuer quotas, emergency pausing, and safe two-step ownership transfer. V2 has not yet been deployed to Polygon mainnet, so do not use the V1 address with V2 scripts.
+This address is the V1 contract. V1 does not support ownership transfer. V2 is kept in the separate `ibex-smart-contract-demo-v2` folder and must eventually be deployed to a new address.
 
 ## How The User And Website Interact
 
@@ -103,7 +103,7 @@ User -> website -> authenticated backend -> ML model and private database
                                       -> proof queue -> issuer wallet -> Polygon
 ```
 
-Website account bans, request throttling, and duplicate-job prevention happen in the backend. V2 independently rejects repeated score periods, updates inside its 28-day cooldown, reused event hashes, and submissions above an issuer's daily allowance.
+Website account bans, request throttling, and duplicate-job prevention happen in the backend.
 
 ## 4. Install The Project
 
@@ -139,7 +139,7 @@ npm run test
 Expected result:
 
 ```text
-42 passing
+15 passing
 ```
 
 ## 5. Create The Score Event
@@ -572,52 +572,6 @@ npm run submit:polygon
 npm run read:polygon
 npm run verify:polygon
 ```
-
-## 18. V2 Protected Contract Commands
-
-V2 must be deployed to a new address. Run its local demo first:
-
-```bash
-npm run compile
-npm run test
-npm run demo:v2
-```
-
-Before a real deployment, set a planned daily issuer limit in `.env`:
-
-```text
-V2_DAILY_ISSUER_LIMIT=1000
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=
-```
-
-Deploying spends real POL:
-
-```bash
-npm run wallet:polygon
-npm run deploy:v2:polygon
-```
-
-Put the new address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. Do not put the existing V1 address there. V2 operations then use:
-
-```bash
-npm run submit:v2:polygon
-npm run read:v2:polygon
-npm run verify:v2:polygon
-```
-
-The score period comes from the JSON timestamp. It can be set explicitly as `SCORE_PERIOD=202608`. Keep the same private `USER_SALT` so a user receives the same stable `userHash` each month.
-
-The V2 owner can manage safeguards with:
-
-```bash
-V2_ADMIN_ACTION=add-issuer npm run admin:v2:polygon
-V2_ADMIN_ACTION=remove-issuer npm run admin:v2:polygon
-V2_ADMIN_ACTION=pause npm run admin:v2:polygon
-V2_ADMIN_ACTION=unpause npm run admin:v2:polygon
-V2_DAILY_ISSUER_LIMIT=1500 V2_ADMIN_ACTION=set-daily-limit npm run admin:v2:polygon
-```
-
-See `README.md` for the two-step ownership transfer commands and full V2 explanation.
 
 ## Final Summary
 

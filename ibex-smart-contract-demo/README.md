@@ -4,7 +4,7 @@ Ibex Credit is a universal credit rating platform for internationals in the UK. 
 
 For a simple laptop-to-Polygon walkthrough, see [`TEAMMATE_SMART_CONTRACT_GUIDE.md`](./TEAMMATE_SMART_CONTRACT_GUIDE.md).
 
-The V1 demo contract is deployed on **Polygon PoS mainnet**. It has also been exercised with a mock credit score event whose proof was submitted, read back, and successfully verified against the original off-chain event. `ScoreAuditRegistryV2` is implemented and tested in this repository but has not yet been deployed to mainnet.
+This folder contains only V1, which is deployed on **Polygon PoS mainnet**. The protected V2 contract is a separate standalone project in [`../ibex-smart-contract-demo-v2`](../ibex-smart-contract-demo-v2/README.md) and has not yet been deployed.
 
 Ibex uses Polygon as a tamper-evident audit layer. The ML-generated score and user financial data remain off-chain. When a score is generated or updated, the backend creates a score event hash and Merkle root. The smart contract stores those proofs on Polygon. Later, anyone with permission to view the off-chain record can recompute the hash and verify that the score event has not been changed.
 
@@ -71,7 +71,7 @@ V1 stores only these values on-chain:
 - `timestamp`
 - `issuer address`
 
-V2 keeps the same proof data and adds the non-personal `scorePeriod` value, such as `202608`, plus minimal anti-abuse state for used event hashes and per-issuer daily counters. It still does not store the score or source JSON.
+The separate V2 project adds non-personal anti-abuse state without storing the score or source JSON.
 
 ## What Is Kept Off-Chain
 
@@ -152,35 +152,6 @@ Verification result: VALID
 The off-chain score event matches the on-chain audit proof.
 ```
 
-## ScoreAuditRegistryV2 Abuse Protections
-
-V2 is in `contracts/ScoreAuditRegistryV2.sol`. It preserves V1 so the existing deployment and proof history remain available.
-
-V2 adds:
-
-- approved-issuer-only submissions
-- one strictly newer `YYYYMM` score period for each stable `userHash`
-- a 28-day safety cooldown between successful updates for the same user hash
-- global duplicate `scoreEventHash` rejection
-- a configurable daily successful-submission limit for each issuer wallet
-- owner-controlled emergency pause and unpause
-- owner-controlled issuer addition and removal
-- OpenZeppelin two-step ownership transfer
-- disabled ownership renunciation to prevent accidentally leaving the contract ownerless
-- rejection of zero hashes and malformed score periods
-
-The scoring period is normally derived from the score event's UTC timestamp. `SCORE_PERIOD` can override it when needed:
-
-```text
-SCORE_PERIOD=202608
-```
-
-The same stable backend `USER_SALT` must be used for a user over time. Rotating the salt changes the `userHash` and would make the contract treat that person as a new pseudonymous user.
-
-V2 deliberately does not automatically ban a website user. Polygon sees the approved backend issuer wallet, not the human operating the website. User bans, HTTP rate limits, account lockouts, and idempotency keys belong in the authenticated backend. The contract can pause all submissions or the owner can remove a compromised issuer.
-
-The daily contract limit counts successful submissions per issuer per UTC day. It is a circuit breaker, not a substitute for backend controls. A stolen issuer private key can transfer the wallet's POL directly, so production issuer wallets must be isolated, tightly funded, monitored, and never exposed to the frontend.
-
 ## Install
 
 ```bash
@@ -206,14 +177,6 @@ Run the full local proof flow:
 ```bash
 npm run demo
 ```
-
-Run the protected V2 flow:
-
-```bash
-npm run demo:v2
-```
-
-The V2 demo submits one proof, verifies it, confirms that a duplicate submission is rejected, and prints the issuer's remaining daily allowance.
 
 Expected output includes:
 
@@ -357,77 +320,6 @@ npm run verify:polygon
 
 Every later call to `npm run submit:polygon` creates another real Polygon mainnet transaction and spends a small amount of POL. For the same `userHash`, the contract updates `latestRecordByUserHash`; the earlier transactions remain permanently visible in Polygon's transaction history.
 
-### Deploy V2 To Polygon Mainnet
-
-Do not reuse the V1 address for V2. Before deploying, choose a daily successful-submission limit based on expected volume and leave room for operational retries:
-
-```text
-V2_DAILY_ISSUER_LIMIT=1000
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=
-```
-
-Confirm the owner wallet and balance, then deploy:
-
-```bash
-npm run wallet:polygon
-npm run deploy:v2:polygon
-```
-
-Deployment spends real POL. Copy the printed V2 address into `.env`:
-
-```text
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=0xYourNewV2Address
-```
-
-Run the local V2 demo and full tests before any mainnet deployment:
-
-```bash
-npm run compile
-npm run test
-npm run demo:v2
-```
-
-Submit, read, and verify a V2 proof with:
-
-```bash
-npm run submit:v2:polygon
-npm run read:v2:polygon
-npm run verify:v2:polygon
-```
-
-V2 derives the scoring period from the event timestamp unless `SCORE_PERIOD=YYYYMM` is set. A second submission for the same period, a submission within 28 days, a reused event hash, a paused registry, or an exhausted issuer quota is rejected.
-
-### Administer V2
-
-The V2 admin script uses `V2_ADMIN_ACTION`. The configured `PRIVATE_KEY` must belong to the V2 owner for every action except `accept-ownership`.
-
-```bash
-# Add or remove the public address in ISSUER_ADDRESS
-V2_ADMIN_ACTION=add-issuer npm run admin:v2:polygon
-V2_ADMIN_ACTION=remove-issuer npm run admin:v2:polygon
-
-# Emergency circuit breaker
-V2_ADMIN_ACTION=pause npm run admin:v2:polygon
-V2_ADMIN_ACTION=unpause npm run admin:v2:polygon
-
-# Change the configurable daily issuer quota
-V2_DAILY_ISSUER_LIMIT=1500 V2_ADMIN_ACTION=set-daily-limit npm run admin:v2:polygon
-```
-
-Ownership transfer requires two separate transactions. First, the current owner starts the transfer:
-
-```bash
-NEW_OWNER_ADDRESS=0xNewOwner V2_ADMIN_ACTION=transfer-ownership npm run admin:v2:polygon
-```
-
-Then the pending owner configures their own private key locally and accepts:
-
-```bash
-V2_ADMIN_ACTION=accept-ownership npm run admin:v2:polygon
-```
-
-For production, the intended owner should be a properly configured multisig rather than one person's general-purpose wallet.
-
 ## Approve Another Issuer Wallet
 
 Only an approved issuer can submit score proofs. A teammate should send the contract owner only their public wallet address. They must never share their private key.
@@ -553,8 +445,6 @@ Possible tampering detected.
 
 This keeps the demo readable while still showing the core production idea: Ibex-approved backend wallets can anchor score proofs, and unapproved wallets cannot.
 
-`ScoreAuditRegistryV2` adds two-step ownership, emergency pausing, strict score periods, a cooldown, duplicate detection, and configurable issuer quotas. A new owner is not automatically made an issuer; issuer permission remains a separate explicit decision.
-
 ## Privacy And Data Minimization
 
 No personal financial data is stored on-chain. This matters because blockchain state is public and long-lived. Storing raw identity, credit, bank, income, visa, address, or ML feature data on-chain would create serious privacy and compliance problems.
@@ -573,7 +463,6 @@ ibex-smart-contract-demo/
 
   contracts/
     ScoreAuditRegistry.sol
-    ScoreAuditRegistryV2.sol
 
   scripts/
     addIssuer.js
@@ -584,25 +473,14 @@ ibex-smart-contract-demo/
     readLatestRecord.js
     verifyScoreEvent.js
 
-    v2/
-      deployV2.js
-      demoLocalFlowV2.js
-      submitScoreRootV2.js
-      readLatestRecordV2.js
-      verifyScoreEventV2.js
-      manageRegistryV2.js
-
   test/
     ScoreAuditRegistry.test.js
-    ScoreAuditRegistryV2.test.js
     ScoreEventFile.test.js
-    ScorePeriod.test.js
 
   utils/
     hashScoreEvent.js
     createMerkleRoot.js
     loadScoreEvent.js
-    scorePeriod.js
 
   examples/
     score-event.example.json
