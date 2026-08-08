@@ -15,6 +15,8 @@
     "verify:amoy": "hardhat run scripts/verifyScoreEvent.js --network amoy",
     "admin:amoy": "hardhat run scripts/manageRegistry.js --network amoy",
     "wallet:polygon": "hardhat run scripts/checkWallet.js --network polygon",
+    "estimate:polygon": "hardhat run scripts/estimateDeployment.js --network polygon",
+    "inspect:polygon": "hardhat run scripts/inspectRegistry.js --network polygon",
     "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
     "submit:polygon": "hardhat run scripts/submitScoreRoot.js --network polygon",
     "read:polygon": "hardhat run scripts/readLatestRecord.js --network polygon",

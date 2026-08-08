@@ -90,7 +90,7 @@ The current contract owner is:
 
 Only the owner can approve or remove issuer wallets. An approved issuer can submit score proofs but cannot control the contract.
 
-This address is the V1 contract. V1 does not support ownership transfer. V2 is kept in the separate `ibex-smart-contract-demo-v2` folder and must eventually be deployed to a new address.
+This address is the V1 contract. V1 does not support ownership transfer. V2 is kept in the separate `ibex-smart-contract-demo-v2` folder and is deployed at `0x8621D09F08C2f58803e7239F8D46D444e0eF63e1`.
 
 ## How The User And Website Interact
 
