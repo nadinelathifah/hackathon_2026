@@ -20,7 +20,7 @@ The platform combines:
 The core architecture rule is:
 
 > Off-chain = users, private data, model execution, scores, explanations, and product logic.  
-> On-chain = hashes, timestamps, Merkle roots, and issuer accountability.
+> On-chain = cryptographic proofs, timestamps, non-personal enforcement state, and issuer accountability.
 
 Polygon does not calculate a score and does not store the model or any personal financial data. It records cryptographic commitments that allow an authorised party to prove later that an off-chain score event has not been changed.
 
@@ -50,7 +50,7 @@ For a later real-user pilot, the preferred model input is a validated feature ve
 
 ## 3. Current Project Status
 
-The blockchain demonstration is complete and running on Polygon PoS mainnet.
+The V1 blockchain demonstration is complete and running on Polygon PoS mainnet. A hardened `ScoreAuditRegistryV2` is implemented and tested in the repository but has not yet been deployed.
 
 | Item | Current value |
 | --- | --- |
@@ -67,7 +67,7 @@ The contract project currently exists at:
 ibex-smart-contract-demo/
 ```
 
-It includes the Solidity contract, hashing utility, Merkle utility, deployment scripts, Polygon scripts, local demonstration, and nine passing tests.
+It includes both Solidity contract versions, hashing and Merkle utilities, V1 and V2 deployment/operation scripts, local demonstrations, and 42 passing tests.
 
 The website, API, Python model service, PostgreSQL schema, anchoring worker, and Docker deployment still need to be implemented for the complete live MVP.
 
@@ -361,7 +361,7 @@ The demonstration uses a reproducible salt only so every local script creates th
 
 ### Stored on Polygon
 
-Only the following proof values are stored by `ScoreAuditRegistry`:
+Only the following proof values are stored by the deployed V1 `ScoreAuditRegistry`:
 
 | On-chain value | Purpose |
 | --- | --- |
@@ -371,6 +371,8 @@ Only the following proof values are stored by `ScoreAuditRegistry`:
 | `modelVersionHash` | Commitment to the model version or model manifest |
 | `timestamp` | Polygon block timestamp recorded by the contract |
 | `issuer` | Approved wallet that submitted the proof |
+
+V2 keeps those proof values and adds a non-personal `scorePeriod` such as `202608`, a used-event-hash flag, and per-issuer daily counters required for anti-abuse enforcement. It still does not store the score-event JSON, actual score, identity, or financial data.
 
 ### Kept off-chain
 
@@ -400,7 +402,7 @@ If a future non-scoring workflow has a justified need for any of these fields, i
 
 ## 12. Smart Contract Responsibilities
 
-The deployed contract is `ScoreAuditRegistry`.
+The deployed V1 contract is `ScoreAuditRegistry`. Its mainnet address and historical proof remain valid.
 
 It provides:
 
@@ -442,6 +444,20 @@ submitScoreRoot(
 ```
 
 The contract does not receive a score, feature vector, identity record, or model artifact.
+
+The repository also includes `ScoreAuditRegistryV2`. V2 adds:
+
+- strictly newer `YYYYMM` score periods for each stable `userHash`;
+- a 28-day minimum interval between successful updates for the same user hash;
+- global duplicate score-event-hash rejection;
+- a configurable daily successful-submission quota for each issuer;
+- OpenZeppelin `Pausable` emergency controls;
+- OpenZeppelin `Ownable2Step` ownership handover;
+- disabled ownership renunciation;
+- zero-hash and score-period validation; and
+- the existing approved issuer and Merkle verification model.
+
+The backend still enforces the exact calendar-month rule, authentication, account or IP rate limits, idempotency keys, and temporary user bans. The contract sees the approved issuer wallet rather than the website user, so automatically banning the transaction caller would incorrectly ban Ibex's own worker.
 
 ## 13. Current Polygon Mainnet Deployment
 
@@ -506,6 +522,7 @@ npm install
 npm run compile
 npm run test
 npm run demo
+npm run demo:v2
 ```
 
 Expected test result:
@@ -553,6 +570,8 @@ Create `.env` from `.env.example` and set:
 PRIVATE_KEY=your_polygon_issuer_private_key
 POLYGON_RPC_URL=https://polygon.drpc.org
 SCORE_AUDIT_CONTRACT_ADDRESS=0xD3da53b74Ce4d79d05D902059F8CC9Ec2a31e534
+SCORE_AUDIT_V2_CONTRACT_ADDRESS=
+V2_DAILY_ISSUER_LIMIT=1000
 POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
 ```
 
@@ -581,20 +600,32 @@ Every `submit:polygon` call spends POL. The latest mapping record is replaced fo
 
 Polygon Amoy remains configured as an optional testnet, but the current project was actually deployed and demonstrated on Polygon mainnet.
 
+V2 must use a new address. After local tests and review, its deployment flow is:
+
+```bash
+npm run compile
+npm run test
+npm run demo:v2
+npm run wallet:polygon
+npm run deploy:v2:polygon
+```
+
+Copy the resulting address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. V2 submission, reading, and verification use `submit:v2:polygon`, `read:v2:polygon`, and `verify:v2:polygon`. V2 has not been deployed merely because these commands and scripts exist.
+
 ## 15. Contract Hardening Before a Real-User Pilot
 
-The current deployment is appropriate for the public demonstration. Before it becomes the audit registry for real users, review and deploy a hardened version.
+The V1 deployment is appropriate for the public demonstration. V2 implements the first hardening pass, but it must still be independently reviewed and deployed to a clearly communicated new address before it becomes the audit registry for real users.
 
-The current contract has a fixed `owner` and no ownership-transfer function. This permanently links administration to the original deployment wallet. A production version should use an established ownership or access-control implementation such as `Ownable2Step` or `AccessControl`.
+V1 has a fixed `owner` and no ownership-transfer function. V2 uses `Ownable2Step`, supports emergency pausing, rejects duplicate/monthly abuse, and limits each issuer's successful daily submissions.
 
 Recommended production controls:
 
 - owner held by a multisig or protected hardware-backed account;
 - a separate server issuer wallet with limited POL;
-- two-step ownership transfer;
+- V2 ownership transferred to a tested multisig through its two-step flow;
 - issuer rotation procedures;
-- zero-address and duplicate-state checks;
-- an intentional pause or incident-response decision;
+- backend authentication, rate limits, monthly idempotency, and queue controls;
+- a documented pause and incident-response decision;
 - verified source code on PolygonScan;
 - deployment record and checksum retained off-chain; and
 - independent contract review before lender reliance.
@@ -1254,6 +1285,9 @@ Verification should:
 ### Blockchain security
 
 - separate owner and issuer roles;
+- enforce stable user hashes, score periods, cooldowns, duplicate rejection, and issuer quotas;
+- keep website-user bans and API throttling off-chain;
+- support emergency pausing and rapid issuer revocation;
 - keep minimal POL in the server issuer wallet;
 - monitor issuer balance;
 - validate chain ID and contract bytecode on startup;
@@ -1318,8 +1352,16 @@ Document procedures to:
 - approved issuer can submit;
 - non-approved issuer cannot submit;
 - latest record is correct;
-- event is emitted; and
-- Merkle proof verification works.
+- event is emitted;
+- Merkle proof verification works;
+- invalid hashes and score periods are rejected;
+- repeated periods and too-early updates are rejected;
+- reused score-event hashes are rejected;
+- daily issuer quotas reset and enforce correctly;
+- pause and unpause permissions work;
+- removed issuers cannot submit;
+- two-step ownership acceptance is enforced; and
+- ownership renunciation is disabled.
 
 ### Proof tests
 
