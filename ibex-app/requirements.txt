@@ -1,0 +1,11 @@
+# Ibex Credit — full app dependencies (serving + scoring).
+# This is the file Render builds with (render.yaml: pip install -r requirements.txt).
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.0
+requests>=2.31
+pandas>=1.5
+numpy>=1.23
+pyarrow>=10.0
+lightgbm>=4.0
+scikit-learn>=1.3

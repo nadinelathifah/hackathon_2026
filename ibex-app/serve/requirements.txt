@@ -1,0 +1,5 @@
+# BUILD 15 serving deps (on top of the project's numpy/pandas/lightgbm)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.0
+requests>=2.31        # live TrueLayer sandbox pull (obcredit/truelayer/client.py)

@@ -1,0 +1,17 @@
+# ---- secrets and local state: never commit ----
+.env
+.env.*
+!.env.example
+serve/users.json
+serve/_anchors/
+score-event.json
+
+# ---- python cruft ----
+__pycache__/
+*.pyc
+
+# ---- editor/backup files ----
+*.bak
+*.sebak
+*.bizbak
+*.advbak

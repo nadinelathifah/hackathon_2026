@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" data-build="ibex-pages-v6">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How the model works &middot; Ibex Credit</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F9FAFB;color:#111827;-webkit-font-smoothing:antialiased}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:#0B2A20;position:sticky;top:0;z-index:20}
+.nav-logo{display:flex;align-items:center;gap:8px}
+.nav-logo-mark{width:28px;height:28px;border-radius:8px;background:#0B3D2E;display:flex;align-items:center;justify-content:center}
+.nav-logo-text{font-weight:700;font-size:18px;color:#fff;letter-spacing:-.01em}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-link{font-size:14px;font-weight:500;color:#fff;opacity:.65;transition:opacity .15s ease;text-decoration:none}
+.nav-link:hover,.nav-link.active{opacity:1}
+.nav-link.active{color:#D0FF71;opacity:1}
+.nav-hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-hamburger span{width:20px;height:2px;background:#fff;border-radius:1px}
+.nav-cta{display:inline-flex;align-items:center;background:#EBFFF5;color:#124A38;border:1.5px solid #5FA98C;padding:8px 16px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap}
+.nav-cta:hover{background:#D4EEE4}
+@media(max-width:840px){.nav{flex-wrap:wrap;padding:14px 18px}.nav-hamburger{display:flex}.nav-links{display:none;flex-direction:column;align-items:flex-start;gap:14px;width:100%;padding:14px 0 4px}.nav-links.nav-links-open{display:flex}.nav-cta{display:none}}
+.mfoot{border-top:1px solid #E5E7EB;background:#fff;padding:28px 24px;text-align:center;font-size:13px;color:#6B7280}
+</style>
+<style>
+.midx{background:#F9FAFB;padding:80px 0}
+.midx .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.midx .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5FA98C;font-weight:700;margin:0 0 12px}
+.midx h2{font-size:40px;line-height:1.12;letter-spacing:-.02em;color:#0B2A20;margin:0 0 16px;font-weight:700}
+.midx .lede{font-size:18px;line-height:1.6;color:#4B5563;max-width:68ch;margin:0 0 56px}
+.midx h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#124A38;font-weight:700;margin:0 0 20px;padding-bottom:12px;border-bottom:1px solid #D4EEE4}
+.midx .grp{margin:0 0 64px}
+.midx .note{font-size:13.5px;line-height:1.6;color:#6B7280;margin:14px 0 0}
+.midx ol.steps{list-style:none;counter-reset:s;margin:0;padding:0}
+.midx ol.steps li{counter-increment:s;position:relative;padding:0 0 22px 60px;margin:0 0 22px;border-bottom:1px solid #EFF1F3}
+.midx ol.steps li:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.midx ol.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:36px;height:36px;border-radius:10px;background:#0B3D2E;color:#D0FF71;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.midx ol.steps b{display:block;font-size:17px;color:#111827;margin:0 0 6px;font-weight:650}
+.midx ol.steps p{margin:0;font-size:15px;line-height:1.62;color:#4B5563}
+.midx .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.midx .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:26px}
+.midx .card b{display:block;font-size:16px;color:#111827;margin:0 0 10px;font-weight:650}
+.midx .card p{margin:0 0 10px;font-size:14.5px;line-height:1.62;color:#4B5563}
+.midx .card p:last-child{margin-bottom:0}
+.midx .eq{background:#0B2A20;color:#E8FFF4;border-radius:14px;padding:24px 26px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;line-height:1.7;overflow-x:auto}
+.midx .eq span{color:#D0FF71}
+.midx table{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden}
+.midx th{text-align:left;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#6B7280;background:#F3F5F7;padding:12px 16px;font-weight:700}
+.midx td{padding:13px 16px;border-top:1px solid #EFF1F3;color:#374151;vertical-align:top}
+.midx td.k{color:#111827;font-weight:600;white-space:nowrap}
+.midx table.feat td{font-size:13.5px;padding:10px 14px}
+.midx td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:#111827;font-weight:600}
+.midx td.src{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#5FA98C;font-weight:700;white-space:nowrap}
+.midx code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#F3F5F7;padding:2px 6px;border-radius:5px;color:#0B3D2E;white-space:nowrap}
+.midx .yes{color:#047857;font-weight:650}
+.midx .no{color:#B45309;font-weight:650}
+.midx .callout{border-left:3px solid #D0FF71;background:#fff;border-radius:0 14px 14px 0;padding:20px 24px;font-size:15px;line-height:1.65;color:#374151;border-top:1px solid #E5E7EB;border-right:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB}
+.midx ul.tick{list-style:none;margin:0;padding:0}
+.midx ul.tick li{position:relative;padding:0 0 12px 26px;font-size:14.5px;line-height:1.6;color:#4B5563}
+.midx ul.tick li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border-radius:2px;background:#5FA98C}
+.midx .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;margin:0 0 24px}
+.midx .flow div{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px;font-size:13.5px;line-height:1.52;color:#4B5563}
+.midx .flow b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5FA98C;margin:0 0 7px;font-weight:700}
+@media(max-width:640px){.midx h2{font-size:30px}.midx{padding:56px 0}}
+@media(max-width:640px){.midx .wrap{padding:0 16px}.midx h1{font-size:29px;letter-spacing:-.5px}.midx .lede{font-size:16px;margin-bottom:40px}.midx .grp{margin-bottom:44px}.midx .card{padding:20px}.midx .cards{grid-template-columns:1fr}.midx .eq{padding:18px 16px;font-size:13px;border-radius:12px}.midx table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.midx td.k{white-space:normal}.midx th,.midx td{padding:10px 12px}.midx code{white-space:normal;word-break:break-word}.midx ol.steps li{padding-left:48px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 20L8.5 7l3.5 6 1.8-2.8L22 20H2z" fill="white"/><path d="M8.5 7l3.5 6 1.8-2.8L22 20H13.8z" fill="#D0FF71"/></svg></div>
+    <span class="nav-logo-text">Ibex Credit</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="/ibex">Get my score</a>
+    <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+    <a class="nav-link active" href="/static/model.html">The model</a>
+    <a class="nav-link" href="/static/business.html">For businesses</a>
+  </div>
+  <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <a href="/static/signup.html" class="nav-cta">Run the demo</a>
+</nav>
+<section id="model-in-depth" class="midx"><div class="wrap">
+<p class="eyebrow">About the model</p>
+<h2>How a score is produced, and what it can honestly claim</h2>
+<p class="lede">Ibex turns a consented bank-transaction history into a probability of default, then into a score, then into a tamper-evident record. This page documents that path end to end: where the data comes from, the exact features used, the mechanics of the score, how the result is proved, how the error bars are calculated, where bias could enter, and what we would fix next. Every figure is reproducible from the artifacts in the repository.</p>
+
+<div class="grp">
+<h3>1 &middot; Where the data comes from</h3>
+<div class="flow">
+<div><b>Step 1</b>Applicant picks their bank and is redirected to it through TrueLayer.</div>
+<div><b>Step 2</b>They authenticate with the bank directly. Ibex never sees the credentials.</div>
+<div><b>Step 3</b>The bank returns a one-time authorisation code, exchanged for a short-lived access token.</div>
+<div><b>Step 4</b>Ibex pulls accounts, balances, up to 24 months of transactions, and the account-holder record.</div>
+<div><b>Step 5</b>Transactions are normalised into dated, signed entries with a counterparty label.</div>
+</div>
+<div class="cards">
+<div class="card"><b>How the data is attached to a person</b><p>The name on the score is not typed in by the applicant. It comes from the account-holder record the bank itself returns, which the bank has already verified under its own KYC obligations.</p><p>That is what makes the score meaningful: an applicant cannot present someone else. The identity, the transaction history and the resulting score all originate from the same authenticated bank session.</p></div>
+<div class="card"><b>Consent, and its limits</b><p>Access is scoped to the specific permissions granted -- account details, balances, transactions and identity -- and expires. It is revocable at the bank at any time, without involving Ibex.</p><p>The same normalisation code path serves both the live bank feed and the training data, so a feature computed in production is computed exactly as it was in training.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>2 &middot; The pipeline, end to end</h3>
+<ol class="steps">
+<li><b>Data intake</b><p>1,526,660 applications, each with a 24-month repayment history. The live open-banking feed enters the same code path as the training data, so nothing is computed one way in research and another way in production.</p></li>
+<li><b>Feature construction</b><p>A recurring-payment detector groups debits by counterparty and rounded amount, then keeps only clusters that behave like obligations: a minimum number of payments, a median gap of 5 to 40 days, and an amount coefficient of variation at or below 0.35. Surviving streams are classified as loan, card or BNPL. From those, and from the declared fields, 74 candidate features are built.</p></li>
+<li><b>Parity verification</b><p>Every feature from the open-banking path is checked against the reference implementation value for value, at a tolerance of 1e-6 absolute plus 1e-4 relative, with both-missing counted as agreement. Mean match rate is 0.93. Anything that cannot be reproduced from a bank feed is refused, whatever its predictive power.</p></li>
+<li><b>Feature selection</b><p>Four gates in order: null-importance screening against 30 label-shuffled runs at the 95th percentile, a correlation prune at 0.90, an information-value floor of 0.005, then permutation importance on validation. 74 candidates reduce to 16.</p></li>
+<li><b>Training</b><p>Gradient-boosted trees (LightGBM), 132 rounds, native missing-value handling, monotone constraints where the economic direction is unambiguous. Chosen over XGBoost and a blend on calibration-set Gini, never on the evaluation set.</p></li>
+<li><b>Calibration</b><p>Raw model output is not a probability. Isotonic regression on a held-out 305,332-row slice maps rank to calibrated risk. Brier falls from 0.1789 to 0.0263; expected calibration error is 0.0057.</p></li>
+<li><b>Scoring and proof</b><p>The calibrated probability becomes a score, the floor and ceiling are applied, reason codes are attached, and the score event is hashed and anchored on chain.</p></li>
+</ol>
+<div class="cards" style="margin-top:24px">
+<div class="card"><b>Why gradient-boosted trees</b><p>Credit features are tabular, monotone in known directions, and full of genuinely missing values. Boosted trees handle all three natively: no imputation pipeline that could drift between training and serving, and monotone constraints are enforced at the split level rather than hoped for. A neural network was never a serious candidate -- with 16 engineered features there is no representation to learn, and the opacity cost is real.</p></div>
+<div class="card"><b>How LightGBM was chosen</b><p>LightGBM, XGBoost and a blend were trained on identical features and identical splits, and compared on the calibration slice only. The evaluation slice was never touched during selection, so the comparison cannot leak into the reported figures. LightGBM won on calibration-set Gini; the blend added a second model's explanation and monitoring burden without a measured gain, so it was rejected on parsimony.</p></div>
+<div class="card"><b>How the shape is fixed</b><p>Training stopped at 132 rounds, the best iteration on validation rather than a fixed budget. Monotone constraints apply wherever the economic direction is unambiguous -- more arrears can never raise a score, a longer clean streak can never lower one -- so the model cannot learn a perverse relationship even where the data is thin enough to suggest one by chance.</p></div>
+<div class="card"><b>Learning from rare defaults</b><p>Defaults are rare -- about 4% of rows -- so a model that called every loan clean would still be about 96% accurate, and the training has to be forced to care. Correction one happens during training: LightGBM's <code>scale_pos_weight</code> is set to the ratio of clean to defaulted rows (about 25 to 1), so each default contributes as much to the loss as roughly 25 clean loans, and splits that isolate defaulters become worth making.</p><p>The side effect is that the raw margins now describe a synthetic world where defaults are roughly half the population, so they are no longer real probabilities. Correction two happens after training: isotonic regression, fit with PAVA on the held-out calibration slice, maps raw margins back onto real probabilities -- a monotone step function over 2,000 quantile bins, with a Beta prior of strength 100 centred on the calibration base rate (3.88%) pulling thin bins back toward it, and the hybrid tail plus the 0.92% floor handling the sparse extreme. The weight fixes ranking power; the isotonic restores probability meaning.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>3 &middot; The exact features in the model</h3>
+<p style="font-size:16px;line-height:1.6;color:#4B5563;margin:0 0 24px">All sixteen, with the drop in evaluation Gini when that feature alone is randomly permuted. Higher means the model leans on it more.</p>
+<table class="feat">
+<thead><tr><th>Feature</th><th>What it measures</th><th>Source</th><th>Importance</th></tr></thead>
+<tbody><tr><td class="k"><code>current_clean_streak_24m</code></td><td>Consecutive months, up to today, with no missed payment on any detected obligation</td><td class="src">Bank feed</td><td class="n">0.15814</td></tr><tr><td class="k"><code>declared_income_type_code</code></td><td>How income is earned: salaried, self-employed, pension, benefits or other</td><td class="src">Declared</td><td class="n">0.05715</td></tr><tr><td class="k"><code>pct_dpd_payments_24m</code></td><td>Share of scheduled payments in the window that were made late</td><td class="src">Bank feed</td><td class="n">0.02135</td></tr><tr><td class="k"><code>agg_dpd_count</code></td><td>Total count of days-past-due events across every detected obligation</td><td class="src">Bank feed</td><td class="n">0.01974</td></tr><tr><td class="k"><code>declared_employment_code</code></td><td>Employment status and tenure bucket</td><td class="src">Declared</td><td class="n">0.01806</td></tr><tr><td class="k"><code>longest_clean_streak_24m</code></td><td>The longest unbroken run of clean months anywhere in the window</td><td class="src">Bank feed</td><td class="n">0.01549</td></tr><tr><td class="k"><code>monthly_income</code></td><td>Median monthly income from detected recurring credits</td><td class="src">Bank feed</td><td class="n">0.01378</td></tr><tr><td class="k"><code>debt_to_income</code></td><td>Detected monthly obligations divided by monthly income</td><td class="src">Bank feed</td><td class="n">0.00800</td></tr><tr><td class="k"><code>total_overdue_amount</code></td><td>Amount currently past due across all detected obligations</td><td class="src">Bank feed</td><td class="n">0.00343</td></tr><tr><td class="k"><code>declared_income_gap</code></td><td>Difference between declared income and income visible in the feed</td><td class="src">Both</td><td class="n">0.00284</td></tr><tr><td class="k"><code>dpd_late_autocorr_lag1_24m</code></td><td>Whether a late month tends to be followed by another late month</td><td class="src">Bank feed</td><td class="n">0.00239</td></tr><tr><td class="k"><code>n_features_missing</code></td><td>How many inputs could not be computed for this applicant</td><td class="src">Meta</td><td class="n">0.00052</td></tr><tr><td class="k"><code>declared_provided</code></td><td>Whether the applicant filled in the declared fields at all</td><td class="src">Meta</td><td class="n">0.00052</td></tr><tr><td class="k"><code>income_detected</code></td><td>Whether any recurring income stream was found</td><td class="src">Bank feed</td><td class="n">0.00000</td></tr><tr><td class="k"><code>thin_file</code></td><td>Whether the history is too sparse to support the full feature set</td><td class="src">Meta</td><td class="n">0.00000</td></tr><tr><td class="k"><code>dpd_late_autocorr_lag2_24m</code></td><td>Two-month-lag version of the arrears persistence measure</td><td class="src">Bank feed</td><td class="n">-0.00002</td></tr></tbody>
+</table>
+<p class="note"><b>Bank feed</b> is derived from transactions; <b>Declared</b> is stated by the applicant and optional; <b>Meta</b> describes the completeness of the data rather than the applicant. The last three sit at or below zero, meaning they add nothing measurable to ranking on their own -- they are retained as explicit flags so that missing or sparse data is modelled openly rather than silently imputed. The top feature carries the largest share of importance by a wide margin, which is itself listed as a model risk below.</p>
+<div class="cards" style="margin-top:20px">
+<div class="card"><b>Obligations before transactions</b><p>Raw transactions are noise; obligations are the causal substrate of default. The detector groups debits by counterparty and rounded amount, then keeps only streams that behave like commitments: enough payments to be a pattern, a median gap of 5 to 40 days (weekly to monthly cadence), and an amount coefficient of variation at or below 0.35 so irregular transfers cannot pass as loans. Everything the model knows about repayment behaviour is computed on those streams, never on raw spend.</p></div>
+<div class="card"><b>Persistence is the signal</b><p>The design favours sustained behaviour over single events. The current clean streak (0.158) is the most important feature by a wide margin, the longest historical streak (0.015) ranks alongside the arrears counts, and the autocorrelation lags exist because one late month predicting the next is more informative than either month alone. A 24-month window balances recency against having enough history for a streak to mean anything.</p></div>
+<div class="card"><b>Declared data, handled honestly</b><p>Declared categoricals are encoded as a stable MD5-derived code -- the same string maps to the same number in training and in production, which is what makes train/serve parity checkable at all. Declared income is cross-checked against detected income through <code>declared_income_gap</code>, so an inflated claim is itself evidence. Housing was engineered twice (a homeowner flag and a tenure code) and both candidates were rejected at selection, which is why the form no longer asks it; education was removed by policy, not by a gate.</p></div>
+<div class="card"><b>Missing is modelled, not filled in</b><p>Four of the sixteen features describe the data rather than the applicant: whether income was detected, whether the file is thin, whether anything was declared, and how many inputs are missing. LightGBM routes missing values natively, so a thin file takes a different path through the same trees instead of being silently imputed to the mean. Absence of history is treated as absence of evidence, not evidence of risk.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>4 &middot; The mechanics</h3>
+<div class="eq">score = <span>427.1229</span> + <span>57.7078</span> &times; ln( (1 &minus; PD) / PD )</div>
+<p style="font-size:14.5px;line-height:1.62;color:#4B5563;margin:16px 0 24px">The multiplier is 40 / ln(2), so every doubling of the odds of repayment adds exactly 40 points. The offset anchors a score of 600 to odds of 20:1. The gap between two scores is therefore a statement about odds, not an arbitrary ranking.</p>
+<div class="cards">
+<div class="card"><b>The probability floor</b><p>The model may not claim a risk below 0.916%. That is not a preference, it is where the evidence runs out: in the safest bucket only a few hundred applicants with a handful of defaults support the estimate, so a Beta posterior over that bucket sets the lowest defensible claim.</p><p>The floor is fixed policy; its value is re-derived at every retrain.</p></div>
+<div class="card"><b>The score ceiling</b><p>Because the floor caps how low PD can go, it caps the score at 697.4. About 0.17% of applicants reach it, so it is a genuine limit on claims rather than a bunching artefact.</p><p>A consequence worth stating plainly: band A cannot currently be reached. Awarding a top band would require evidence this data does not contain.</p></div>
+<div class="card"><b>Bands</b><p>A from 720, B from 660, C from 600, D from 540, E below. Boundaries are fixed on the odds scale and are not rebased at retrain, so a B this year means the same odds as a B last year.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>5 &middot; Proof: hashing and the smart contract</h3>
+<p style="font-size:16px;line-height:1.6;color:#4B5563;margin:0 0 24px">The chain is used for one job only: proving that a score existed, in a specific form, at a specific time, from a specific model. No personal data, no transactions and no score value are written to it.</p>
+<table>
+<thead><tr><th>Anchored value</th><th>What it is</th><th>What it proves</th></tr></thead>
+<tbody>
+<tr><td class="k"><code>userHash</code></td><td>Salted hash of the bank-verified identity</td><td>The record belongs to one specific person, without publishing who they are</td></tr>
+<tr><td class="k"><code>scoreEventHash</code></td><td>Hash of the score event: score, band, PD, timestamp, model version and reason codes</td><td>The result has not been altered after the fact</td></tr>
+<tr><td class="k"><code>modelVersionHash</code></td><td>Hash of the model artifacts that produced it</td><td>Which model version issued the score, so an old score cannot be attributed to a newer model</td></tr>
+<tr><td class="k"><code>merkleRoot</code></td><td>Root of the batch the event was included in</td><td>Many events can be anchored in one transaction without weakening any individual proof</td></tr>
+<tr><td class="k"><code>txHash</code></td><td>The anchoring transaction itself</td><td>An independently checkable timestamp</td></tr>
+</tbody>
+</table>
+<div class="cards" style="margin-top:20px">
+<div class="card"><b>How a lender verifies</b><p>The applicant hands over their score-event file. The lender pastes it into the verification page; the server recomputes the hash and compares it against the value anchored on chain. A match means the file is byte-for-byte what was issued.</p><p>Verification is pull-based and consent-first: the lender can only check a record the applicant has chosen to share.</p></div>
+<div class="card"><b>Why hashes rather than data</b><p>A hash is one-way. Publishing it proves a document existed without revealing anything inside it, so the chain can be public while the financial data never leaves the private server.</p><p>The chain adds no predictive power. It is an integrity mechanism, not part of the model.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>6 &middot; Is it unbiased?</h3>
+<p style="font-size:16px;line-height:1.6;color:#4B5563;margin:0 0 24px">Bias is handled as a register of specific risks with a specific status, not as a single claim.</p>
+<table>
+<thead><tr><th>Risk</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td class="k">Protected attributes</td><td class="yes">Excluded</td><td>No age, sex, ethnicity, nationality, marital status or postcode enters the model at any stage.</td></tr>
+<tr><td class="k">Education</td><td class="yes">Excluded by policy</td><td>Available and mildly predictive; dropped because it proxies socio-economic background more than repayment behaviour.</td></tr>
+<tr><td class="k">Proxy leakage</td><td class="no">Acknowledged</td><td>Income, housing and employment tenure correlate with protected characteristics. They are retained because they are directly causal for affordability, but omitting the protected field does not remove the correlation.</td></tr>
+<tr><td class="k">Perverse monotonicity</td><td class="yes">Constrained</td><td>Monotone constraints stop the model ever learning that more arrears or a shorter clean streak improves a score.</td></tr>
+<tr><td class="k">Outcome fairness testing</td><td class="no">Not performed</td><td>Disparate-impact ratios across protected groups have not been computed, because the data carries no protected labels to test against. A genuine gap, stated rather than glossed.</td></tr>
+<tr><td class="k">Thin-file penalty</td><td class="yes">Measured</td><td>A thin-file flag is carried explicitly, so absence of history is treated as absence of evidence rather than evidence of risk.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="grp">
+<h3>7 &middot; Is it fair?</h3>
+<div class="cards">
+<div class="card"><b>Every decision is explained</b><p>Each score carries the specific features that pushed it down and those that held it up, with their contributions, for that applicant rather than an average.</p></div>
+<div class="card"><b>Declared fields are optional</b><p>Employment, income type and housing can be left blank without penalty. Whether the applicant declared at all is carried as its own flag, so a blank is never silently read as a negative.</p></div>
+<div class="card"><b>Decision support, not a verdict</b><p>Ibex returns a probability and a band. It declines no one. The lending decision, and the policy behind it, stays with the lender.</p></div>
+<div class="card"><b>Honest limits</b><p>The service publishes its own ceiling and its own error bars next to every score. A model that cannot say how uncertain it is should not be trusted with the decision.</p></div>
+</div>
+</div>
+
+<div class="grp">
+<h3>8 &middot; Stability, and how the error bars are calculated</h3>
+<div class="cards">
+<div class="card"><b>Measured across 32 origination weeks</b><p>The observed default rate drifts from 4.49% to 2.27% across the evaluation window. It does not glide down: most of the step occurs at week 65, where weekly volume simultaneously falls from a pre-break peak of 17,164 to a trough of 825 applications before recovering, so this is better described as a regime break than a smooth drift. The 5 weeks before the break carry 23.3% of the evaluation rows but 38.5% of the defaults. Right-censoring contributes at the very end, since the newest cohorts have had least time to default, but neither effect is the model decaying: the booster is held fixed across the whole window.</p></div>
+<div class="card"><b>Design effect 2.20&times;</b><p>Applications arrive in weekly cohorts sharing an economy and a credit policy, so they are not independent. Resampling whole weeks inflates variance by 4.86&times;, making the honest standard error 2.20&times; the naive one. 305,332 evaluation rows carry the information of roughly 62,833 independent ones.</p></div>
+<div class="card"><b>The stability figure</b><p>Per-vintage Gini is computed for every week with enough defaults to support it. A stable model gives a flat series with small spread; a drifting one shows trend. It is recomputed at each retrain and reported with the model, not asserted once. On the current build it is 0.3766: mean weekly Gini 0.4018, slope +0.00347 per week, so the deterioration penalty is zero and the whole gap is week-to-week scatter.</p></div>
+</div>
+
+<p style="font-size:16px;line-height:1.6;color:#4B5563;margin:36px 0 20px">Every interval printed beside a score comes from the same six-step procedure. The important choice is the second one: what gets resampled.</p>
+<ol class="steps">
+<li><b>Divide the evaluation set into blocks</b><p>The 305,332 evaluation rows fall into 32 weekly origination cohorts. A cohort shares a macroeconomic environment, a marketing mix and a credit policy, so two applicants from the same week are more alike than two drawn at random.</p></li>
+<li><b>Resample whole weeks, not individual rows</b><p>Draw 32 blocks with replacement to build a synthetic evaluation set of the same size in expectation. Cohort sizes are unequal, from 825 to 17,886 applications, so the row count of a replicate varies by about 9% around 305,332. Resampling rows would silently assume every application is independent, which is the assumption that fails here. This single choice is what separates the honest standard error from the flattering one.</p></li>
+<li><b>Refit the calibrator on every replicate</b><p>The isotonic calibration is re-estimated from scratch inside each replicate. Reusing one calibrator would treat the calibration step as error-free and understate the uncertainty on every PD.</p></li>
+<li><b>Recompute every published quantity</b><p>On each replicate: Gini, the PD at scores 600, 660 and 697, the probability floor, and the tail counts below the floor knot. Nothing is derived analytically from another quantity.</p></li>
+<li><b>Repeat 500 times, then read percentiles</b><p>The 2.5th and 97.5th percentiles of the replicate distribution give the interval. Not the point estimate plus or minus 1.96 standard errors: the Gini distribution is skewed by +0.25 and the floor distribution by +1.30, so a symmetric interval would put both ends in the wrong place.</p></li>
+<li><b>Map PD bounds through the score formula</b><p>The score interval is the PD interval pushed through score = 427.1229 + 57.7078 ln((1 &minus; PD)/PD). Because that transform is non-linear, the resulting score interval is asymmetric around the point score -- correctly so.</p></li>
+</ol>
+
+<div class="cards" style="margin-top:28px">
+<div class="card"><b>How many times things actually run</b><p>Selection is not a single pass. The null-importance gate shuffles the labels <b>30</b> times and keeps only features whose real importance beats the 95th percentile of those null runs. The permutation-importance gate then permutes each surviving feature <b>3</b> times on the validation slice and averages the Gini drop. Inference runs <b>500</b> whole-week bootstrap replicates. The bootstrap never changes anyone's score -- it exists only to measure uncertainty; scoring itself is always a single point estimate on the applicant's real data.</p></div>
+<div class="card"><b>Why a bootstrap at all</b><p>There is no closed-form standard error for a Gini once two things hold at once: applicants arrive in correlated weekly cohorts, and the calibrator is itself estimated from data. DeLong's formula assumes independence and a fixed calibration, so it can only understate. Resampling whole weeks and refitting the calibrator inside every replicate is the only way to carry both sources of uncertainty into the interval.</p></div>
+<div class="card"><b>How the interval is read off</b><p>Each replicate yields one value of every published quantity: Gini, the PD at each reference score, the floor. The reported interval is the 2.5th and 97.5th percentiles of that distribution of 500 -- not the point estimate plus or minus 1.96 standard errors. The replicate distributions are skewed (+0.25 for Gini, +1.30 for the floor), so a symmetric interval would misplace both ends; the percentile interval assumes no shape at all.</p></div>
+</div>
+<table style="margin-top:32px">
+<thead><tr><th>Quantity</th><th>How its uncertainty is estimated</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td class="k">Gini, analytic</td><td>DeLong standard error. Assumes independent observations, so it is reported only for contrast.</td><td class="n">0.0060</td></tr>
+<tr><td class="k">Gini, iid bootstrap</td><td>Resamples individual rows with replacement, 500 replicates. Agrees with DeLong, which confirms the gap below is clustering rather than a coding difference.</td><td class="n">0.0061</td></tr>
+<tr><td class="k">Gini, block bootstrap</td><td>Resamples whole origination weeks. <b>This is the figure quoted everywhere in the product.</b></td><td class="n">0.0135</td></tr>
+<tr><td class="k">PD at a given score</td><td>Percentile interval across the 500 block replicates, each with its own refitted calibrator.</td><td class="n">per score</td></tr>
+<tr><td class="k">Score interval</td><td>The PD bounds mapped through the points-to-double-the-odds formula.</td><td class="n">asymmetric</td></tr>
+<tr><td class="k">Probability floor</td><td>Beta posterior over the safest bucket using an informative prior of strength 100 centred on the portfolio base rate; where a bucket contains zero defaults the rule of three gives roughly 3/n as the upper bound.</td><td class="n">0.61% to 1.81%</td></tr>
+<tr><td class="k">Tail evidence</td><td>Bootstrap over the count of observations below the floor knot.</td><td class="n">1825 obs, 13 defaults</td></tr><tr><td>Cluster count</td><td>The block bootstrap resamples 32 origination weeks. Because cohort sizes are unequal (825 to 17,886 applications, CV 0.51), the effective number of clusters is about 25.5 (Carter, Schnepel and Steigerwald, 2017). Cluster-resampled inference is unreliable below roughly 40 clusters and biased downward, so the quoted standard error is a lower bound.</td><td class="n">32 weeks, G_eff 25.5</td></tr><tr><td>Clusters behind the PD intervals</td><td>Gini uncertainty resamples the evaluation slice (32 weeks). The PD intervals at each reference score come from refitting the calibrator on the calibration slice, which spans only 15 weeks because it holds the same 305,332 rows in a higher-volume period. The PD intervals are therefore the least well determined figures on this page.</td><td class="n">15 weeks</td></tr><tr><td>Calibrator used in the bootstrap</td><td>Replicates refit isotonic regression on 2,000 quantile bins (~153 rows per knot) rather than the production fit on every distinct raw score. Faster and better behaved, but a slightly different estimand.</td><td class="n">2,000 bins</td></tr><tr><td>What is held fixed</td><td>The booster is not refitted across replicates, so these intervals capture calibration and evaluation sampling variability, and are conditional on this fitted model.</td><td class="n">booster fixed</td></tr><tr><td>Censoring at the ceiling</td><td>At the top reference score 54.8% of replicates clip at the probability floor, so the upper bound is censored and must be read as at or below the floor.</td><td class="n">54.8% clipped</td></tr>
+</tbody>
+</table>
+<div class="callout" style="margin-top:24px">Discrimination on the evaluation set is a Gini of <b>0.3835</b>, with a 95% block-bootstrap confidence interval of <b>0.3613 to 0.4146</b>. The clustered standard error is 0.0135 against a DeLong standard error of 0.0060 -- quoting the smaller of the two would overstate precision by more than a factor of two.</div>
+</div>
+
+<div class="grp" style="margin-bottom:0">
+<h3>9 &middot; Limitations and what comes next</h3>
+<div class="cards">
+<div class="card"><b>Known limitations</b><ul class="tick"><li>Declared fields cannot be verified from a bank feed alone, so they are usable for pricing but not for underwriting on their own.</li><li>One feature carries the largest share of measured importance by a wide margin; concentration that high is a model risk in itself.</li><li>Training labels come only from accepted applicants, so the model has never observed how rejected ones would have behaved.</li><li>Balance trajectories and income-regime shifts are not available in the current feed, capping how much behavioural signal can be extracted.</li></ul></div>
+<div class="card"><b>Planned work</b><ul class="tick"><li>Hyperparameter search, expected to add roughly 0.005 to 0.015 Gini on the current feature set.</li><li>A point-in-time audit of the dominant feature, to confirm no information from after the decision date leaks into it.</li><li>Promote per-vintage stability from a reported diagnostic to a term in model selection, so a slightly weaker but steadier model can win.</li><li>Reject inference, to correct the acceptance bias in the training labels.</li><li>Population stability monitoring in production, alerting when live feature distributions drift from training.</li><li>Disparate-impact testing as soon as a dataset with protected labels can lawfully be used for it.</li></ul></div>
+</div>
+</div>
+
+</div></section>
+<footer class="mfoot">&copy; 2026 Ibex Credit. Demonstration uses synthetic data only. Not a lending decision.</footer>
+<script>
+document.querySelectorAll(".nav-hamburger").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    var links=btn.closest(".nav").querySelector(".nav-links");
+    var open=links.classList.toggle("nav-links-open");
+    btn.setAttribute("aria-expanded",String(open));
+  });
+});
+</script>
+</body>
+</html><!-- se-report-fixed -->

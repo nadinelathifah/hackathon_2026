@@ -1,0 +1,256 @@
+BUILD 18 -- STEP 3j: PLATEAU DE-CAPPING + BASEL PD MECHANICS + 24-MONTH MOCK ACCOUNTS (2026-07-30)
+
+WHAT BUILD 18 CHANGES (calibration + serving; f() UNCHANGED, so parity holds and
+NO feature rebuild is required -- --reuse-ob is fine):
+
+  1) obcredit/modeling/calibration.py -- the real cause of the ~590 score cap.
+     BUILD 17 only rewrote the curve OUTSIDE the observed score support, so it
+     never touched the actual problem: PAVA pools the low-score end of the
+     calibration set into a flat PLATEAU (~5-6% PD here, because OB->OB Gini is
+     only ~0.41). Every strong applicant inside that plateau got the same PD, so
+     the score was hard-capped no matter how good they were.
+     New tail="hybrid" (default) also replaces a TERMINAL PLATEAU inside the
+     support, using a weighted log-odds "backbone" fitted across all knots and
+     ANCHORED so it passes exactly through the join point (continuity => the map
+     stays monotone => ranking, and therefore Gini/AUC, is preserved).
+     tail="loglinear" reproduces BUILD 17; tail="clamp" is the BUILD<=16 legacy.
+
+  2) HONEST NEGATIVE RESULT, recorded because it shaped the design. Whether a
+     plateau should be overridden depends on whether it is a POOLING ARTEFACT or
+     a REAL flat region of risk -- and on a fixture whose tail truly is flat,
+     extrapolating through it made calibration WORSE (Brier +7.5e-05, ECE
+     +3.0e-03). Two attempts to decide this automatically both failed:
+       (a) regressing raw rates INSIDE the plateau is SELECTION-BIASED --
+           conditioning on "PAVA pooled this block" selects for flat/negative
+           observed slopes. Measured z = -1.94 on a fixture built with a genuine
+           positive trend. Wrong sign; would never fire.
+       (b) testing plateau LEVELS against a backbone refitted EXCLUDING the
+           plateau fixes the bias and is well powered, but is defeated by
+           MISSPECIFICATION: a log-linear trend extrapolated into the tail
+           systematically under-predicts. Measured z = +20.5 on a genuinely flat
+           tail but ALSO z = +4.3 on a pure artefact. It cannot separate them.
+     Conclusion: from the calibration sample alone you cannot reliably tell the
+     two apart. So the override is an explicit, documented POLICY switch
+     (break_plateau, default True) and the statistic is REPORTED, not acted on.
+     Read lower_plateau_z as "how much of the de-capping is model assumption
+     rather than observed data" -- the larger it is, the more MoC you should
+     carry.
+
+  3) Basel III / CRR mechanics that were missing once PD is extrapolated:
+       * BASEL_PD_FLOOR = 0.0003. BUILD<=17 defaulted to pd_floor=1e-4 (1bp),
+         which is BELOW the CRR Art.160/163 regulatory floor of 0.03% (3bp).
+         That was a genuine compliance defect, independent of the plateau work.
+       * moc_logodds -- Margin of Conservatism (MoC category C, general
+         estimation error), applied ONLY where PD is extrapolated, never to
+         observed bins (that would double-count).
+       * fit_central_tendency(scores, observed_rate) -- de-capping the tail
+         pushes mean predicted PD down, so it is re-anchored by bisection on a
+         log-odds shift until mean PD == the observed long-run default rate.
+         Monotone, so Gini is unaffected.
+       * diagnose(scores) -- frac_backbone_priced, plateau widths, plateau z,
+         pd_min/max, mean_pd, ct_shift, backbone_slope. You cannot sign off what
+         you cannot see.
+       * expected_calibration_error() -- equal-COUNT binned ECE (equal-width is
+         useless at a ~24% base rate; the top bins are empty).
+     BUILD<=17 calibrator.pkl files carry no per-knot counts, so no backbone can
+     be fitted; they load and degrade safely to the loglinear path.
+
+  4) scripts/calibrate_score.py -- the tail treatment is now chosen BY
+     MEASUREMENT, not by assertion. It fits clamp / loglinear / hybrid and prints
+     Brier, ECE, Gini, pd_min/max and %extrapolated for each on the untouched
+     eval slice, then the full diagnostics for the selected mode. New flags:
+     --tail, --pd-floor, --moc-logodds, --no-break-plateau,
+     --no-central-tendency. Adopt hybrid ONLY if its Brier/ECE are not worse
+     than loglinear; if they are, the plateau was real and the ~590 cap is the
+     honest answer. All of it is persisted into scorecard.json["calibration"].
+
+  5) obcredit/truelayer/client.py -- fetch_user() now sends explicit
+     ?from=&to= on /accounts/{id}/transactions (default 24 months). Without
+     them TrueLayer returns only its default recent window (~3 months on most
+     providers), which was silently starving every temporal feature: the 12m
+     trend/volatility features were being computed off a fraction of the history
+     they assume. Parity-safe (pure I/O window, no change to f()).
+
+  6) serve/mock_ob.py -- 24 months of history by default (was 12), weekly rather
+     than monthly balance snapshots, plus optional savings account, overdraft
+     episodes, gambling spend, returned-DD (NSF) fees, 4-weekly pay, annual
+     bonus and secondary income. New "realistic" profile and build_custom(spec).
+     serve/app.py exposes profile="custom" + a months knob on POST /api/score.
+
+  VALIDATED IN-SANDBOX: run_tests.py 51/51 green (was 41/41), parity untouched.
+  NOT validated here: sandbox has no lightgbm/scipy/network, so the Brier/ECE
+  comparison on the REAL calibration split has not been run. Do that locally
+  before adopting hybrid.
+
+----------------------------------------------------------------------
+
+BUILD 17 -- STEP 3i: DE-BOUNDED ISOTONIC CALIBRATION + RECURRING-INFLOW INCOME DETECTION (2026-07-17)
+
+WHAT BUILD 17 CHANGES (features + calibration -> REQUIRES a full rebuild + retrain):
+  1) obcredit/modeling/calibration.py -- IsotonicCalibrator no longer hard-clamps
+     PD at the lowest/highest observed calibration bin. Outside the observed
+     score support it extends the fitted AVERAGE log-odds trend (monotone),
+     floored at pd_floor=1e-4. This DE-CAPS the credit score: an exceptional
+     applicant is no longer pinned to the in-sample PD floor (the old ~590 / band
+     D ceiling). tail="loglinear" (default) | "clamp" (legacy). Persisted in
+     calibrator.pkl.
+  2) obcredit/adapters/truelayer_adapter.py -- _detect_income rewritten from a
+     naive keyword+median (which latched onto one-off credits -> the constant
+     ~£25 bug) to RECURRING-INFLOW detection: group credits by payee, keep only
+     streams that recur at a stable salary-range cadence with low amount
+     dispersion, convert to a monthly figure, ignore sub-floor noise, prefer a
+     salary-named stream else fall back to the largest recurring inflow. A
+     ~monthly (26-35d) cadence returns the amount UNCHANGED so Kaggle/TrueLayer
+     income parity stays byte-for-byte.
+  3) obcredit/config.py -- new audited income-detection knobs.
+  4) tests/test_income.py (new) proves £25/one-off noise is ignored and monthly
+     salary is detected exactly; tests/test_calibration.py gains de-cap + clamp
+     tests.
+
+Because f() (income) AND the calibrator changed, the cached OB features and the
+old scorecard are STALE. Rebuild the OB cache and retrain -- do NOT reuse the
+old obcache.
+
+--- previous build ---
+BUILD 16 -- STEP 3h: LIVE TRUELAYER SANDBOX OAUTH + BRITISH-RACING-GREEN DASHBOARD (2026-07-17)
+
+WHAT BUILD 16 ADDS (serving only; no change to features/parity/model):
+  1) serve/app.py -- real TrueLayer sandbox OAuth wired into the dashboard:
+       GET  /connect        stash declared form -> redirect to TrueLayer auth
+       GET  /callback       exchange code -> client.fetch_user() -> /?tl=..
+       POST /api/score-live score the LIVE pulled account with the SAME f()
+       GET  /api/tl/status  whether TRUELAYER_CLIENT_ID/SECRET are configured
+     Credentials come from env (TRUELAYER_CLIENT_ID / _SECRET / _REDIRECT_URI /
+     _SANDBOX). Mock profiles retained as an offline fallback.
+  2) obcredit/truelayer/client.py -- authorization_url() builds the hosted-auth
+     link (scope + providers incl. uk-cs-mock); fetch_user() now normalises the
+     /balance response to the {current, timestamp} shape the adapter expects.
+  3) serve/static/index.html -- redesigned: British-racing-green + brass theme,
+     "Connect with TrueLayer" primary flow, demo profiles as a fallback.
+  4) serve/requirements.txt -- adds requests (live sandbox HTTP pull).
+
+  SETUP FOR THE LIVE PULL:
+     1. Create a sandbox app at https://console.truelayer.com -> client_id/secret
+     2. Add redirect URI http://localhost:8000/callback to the app
+     3. PowerShell: $env:TRUELAYER_CLIENT_ID=".."; $env:TRUELAYER_CLIENT_SECRET=".."
+     4. uvicorn serve.app:app --reload --port 8000  (from project root)
+     5. Click "Connect with TrueLayer" -> Mock Bank (uk-cs-mock) -> log in.
+
+----------------------------------------------------------------------
+
+BUILD 15 -- STEP 3g: SERVING BACKEND + DEMO DASHBOARD (2026-07-15)
+
+WHAT BUILD 15 ADDS (no change to features/parity; serving only):
+  1) serve/score_service.py -- ScoringService loads artifacts/ (model_lgbm.txt,
+     calibrator.pkl, scorecard.json) and scores ONE open-banking payload through
+     the SAME f() (TrueLayerAdapter -> FeaturePipeline) and the SAME imputation
+     (training medians -> 0.0) as calibrate_score.py. Emits score, band, PD and
+     adverse-action reason codes (LightGBM pred_contrib).
+  2) serve/mock_ob.py -- generates a TrueLayer fetch_user()-shaped payload so the
+     REAL adapter reconstructs income/obligations from transactions. Three risk
+     profiles (clean / thin / arrears) drive the "connect a bank" demo button.
+  3) serve/app.py -- FastAPI app: GET / dashboard, POST /api/score, /api/health,
+     /api/profiles. serve/static/index.html -- the dashboard UI (declared form +
+     mock bank connect + animated score gauge + reason codes).
+  4) scripts/calibrate_score.py now ALSO writes "medians" into scorecard.json so
+     serving imputes byte-for-byte like _prep_lgbm did at train time.
+
+  RUN THE DEMO (after building artifacts, see below):
+     pip install -r serve/requirements.txt
+     uvicorn serve.app:app --reload --port 8000   # from project root
+     open http://127.0.0.1:8000
+  Override artifacts location with env OBCREDIT_ARTIFACTS=<dir>.
+
+----------------------------------------------------------------------
+
+BUILD 14 -- STEP 3f: DECLARED / ONBOARDING FEATURES + ISOTONIC CALIBRATION + PDO SCORE (2026-07-15)
+
+WHAT BUILD 14 ADDS:
+  1) SEVEN declared / onboarding features (families "stability"/"affordability"),
+     read from Home Credit person_1 and carried VERBATIM through both renderers
+     so Kaggle == TrueLayer (parity-safe). These are facts captured at
+     open-banking ONBOARDING too, so f() is identical at train and serve:
+       declared_income_is_employment  (incometype_1044T, protective)
+       declared_is_homeowner          (housetype_905L, protective)
+       declared_income_type_code      (incometype_1044T)
+       declared_education_code        (education_927M)
+       declared_housing_code          (housetype_905L)
+       declared_employment_code       (empl_employedtotal_800L)
+       declared_income_gap            (|stated mainoccupationinc_384A - observed
+                                       maininc_215A| / max; cross-verification)
+  2) Isotonic calibration (obcredit/modeling/calibration.py, pure-numpy PAVA):
+     maps the raw model score to a real PD, PRESERVES ranking (keeps Gini),
+     improves reliability / Brier. + brier_score + reliability_table.
+  3) Defensible scorecard (obcredit/modeling/scorecard.py): PDO points-to-double
+     -the-odds scaling (600 @ 20:1, +40 doubles the odds), A-E bands, reason
+     codes. Driver: scripts/calibrate_score.py (3-way out-of-time split ->
+     fit -> calibrate -> score -> artifacts/calibrator.pkl + scorecard.json).
+
+  MUST REBUILD THE MATRICES: the 7 new features change the feature set, so any
+  cached kg_/ob_ matrix pkl is STALE. Run run_compare.py WITH --rebuild (or a
+  fresh --cache-dir); do NOT --reuse-ob an old pkl (that bypasses the meta check
+  and silently drops the declared columns).
+
+  HONEST EXPECTATION: declared attributes are strong predictors, so the KG->KG
+  ceiling should rise and OB->OB with it -- but whether it clears 0.50 must be
+  MEASURED on the full data; no promises until run_compare prints it.
+
+  VALIDATED IN-SANDBOX: run_tests.py green (parity preserved incl. 7 declared
+  features); isotonic monotone + improves Brier; scorecard monotone + anchored
+  at 600 for PD = 1/21.
+
+----------------------------------------------------------------------------
+BUILD 13 -- STEP 3e: MANDATE-SEEDED OBLIGATIONS (fixes the exposure collapse) (2026-07-15)
+
+WHAT BUILD 13 FIXES:
+  The BUILD 12 "known limitation" is now RESOLVED. A credit line whose
+  collections fall below the >=3-payment recurring-stream floor (short lines and
+  -- worse -- the most DELINQUENT lines, whose >=15-DPD cycles render as absent
+  transactions) was silently DROPPED from the open-banking reconstruction. That
+  is what made the exposure family degenerate on real data:
+    - agg_instal_count      3.10 (KG) -> 1.68 (OB)
+    - agg_instal_std        collapses to ~0 (most applicants left with 1 line)
+    - total_annuity / sum / avg_instalment_amount / debt_to_income   distorted
+  and it dropped exactly the risk-relevant lines.
+
+  Real open banking exposes GET /accounts/{id}/direct_debits -- a MANDATE list
+  giving each recurring obligation's payee + scheduled amount regardless of how
+  many collections cleared. The renderer previously shipped that list empty.
+
+  FIX (two files, surgical, parity-safe):
+    step3lib/renderers.py       -- to_truelayer_payloads now emits one
+                                   direct_debit mandate per obligation
+                                   {name, merchant_name, amount=instalment}.
+    obcredit/adapters/truelayer_adapter.py
+                                -- new _mandates(); TrueLayerAdapter now (a) takes
+                                   the authoritative per-line instalment straight
+                                   from the mandates (covers EVERY line) and
+                                   (b) SEEDS an obligation for any mandated line
+                                   the detector missed, attaching whatever debits
+                                   did clear so its real lateness still counts.
+
+  DELIBERATELY UNCHANGED: DPD / missed-cycle discovery for already-detected
+  lines. On the clean fixtures nothing was ever dropped, so the seeding branch
+  is inert and instalments are identical -> PARITY STAYS EXACT (25/25 green).
+  On real data OB now reflects ALL lines -> the exposure family recovers.
+
+  VALIDATED IN-SANDBOX:
+    - run_tests.py: 25/25 green (parity preserved).
+    - synthetic delinquent line (1 of 3 collections cleared): pre-fix DROPPED;
+      post-fix recovered as 1 obligation with instalment = mandate amount.
+
+  MUST REBUILD THE OB MATRIX: the open-banking representation changed, so any
+  cached ob_matrix_*.pkl (e.g. lgbm_test_run/cache) is STALE. Run WITHOUT
+  --reuse-ob (or with --rebuild) so OB is reconstructed with mandates.
+
+KNOWN, DOCUMENTED FOLLOW-UP (NOT in this build -- riskier, deferred):
+  A line whose collections ALL fail (0 cleared) is now COUNTED (obligation +
+  instalment) but carries no DPD/overdue signal, because missed-cycle imputation
+  needs >=2 observed payment dates to infer the cadence. Planned Tier-2:
+  impute the full missed schedule from the mandate's stated period so a fully-
+  defaulted line also contributes arrears signal.
+
+----------------------------------------------------------------------------
+BUILD 12 -- STEP 3d: TIER-2 TEMPORAL / TRAJECTORY FEATURES (2026-07-13)
+  10 parity-safe temporal features (order/timing of the DPD sequence).
+  registered 49 -> 59 ; parity 37 -> 47.  See FEATURE_ENGINEERING.md.

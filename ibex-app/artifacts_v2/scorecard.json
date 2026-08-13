@@ -1,0 +1,460 @@
+{
+  "build": "BUILD 20 -- BUILD 18 -- STEP 3j: PLATEAU DE-CAPPING + BASEL PD MECHANICS + 24-MONTH MOCK ACCOUNTS (2026-07-30)",
+  "frame": "ob",
+  "model": "blend",
+  "blend": {
+    "type": "logit_average",
+    "legs": [
+      "model_lgbm.txt",
+      "model_xgb.json"
+    ],
+    "weights": [
+      0.5,
+      0.5
+    ]
+  },
+  "nan_mode": "native",
+  "features": [
+    "pct_dpd_payments_24m",
+    "longest_clean_streak_24m",
+    "avg_overdue_amount_24m",
+    "debt_to_income",
+    "monthly_income",
+    "declared_income_type_code",
+    "declared_education_code",
+    "declared_employment_code",
+    "declared_income_gap",
+    "agg_dpd_count",
+    "current_clean_streak_24m",
+    "dpd_late_autocorr_lag1_24m",
+    "dpd_late_autocorr_lag2_24m",
+    "income_detected",
+    "thin_file",
+    "declared_provided",
+    "n_features_missing"
+  ],
+  "missingness_flags": [
+    "income_detected",
+    "thin_file",
+    "declared_provided",
+    "n_features_missing"
+  ],
+  "medians": {
+    "pct_dpd_payments_24m": 0.0,
+    "longest_clean_streak_24m": 22.0,
+    "avg_overdue_amount_24m": 0.0,
+    "debt_to_income": 0.11799000203609467,
+    "monthly_income": 40000.0,
+    "declared_income_type_code": 8282188.0,
+    "declared_education_code": 1575827.0,
+    "declared_employment_code": 4935501.0,
+    "declared_income_gap": 0.3333333432674408,
+    "agg_dpd_count": 22.0,
+    "current_clean_streak_24m": 17.0,
+    "dpd_late_autocorr_lag1_24m": 0.0,
+    "dpd_late_autocorr_lag2_24m": 0.0,
+    "income_detected": 1.0,
+    "thin_file": 0.0,
+    "declared_provided": 1.0,
+    "n_features_missing": 3.0
+  },
+  "monotone": {
+    "pct_dpd_payments_24m": 1,
+    "longest_clean_streak_24m": -1,
+    "avg_overdue_amount_24m": 1,
+    "debt_to_income": 1,
+    "monthly_income": -1,
+    "declared_income_type_code": 0,
+    "declared_education_code": 0,
+    "declared_employment_code": 0,
+    "declared_income_gap": 1,
+    "agg_dpd_count": 0,
+    "current_clean_streak_24m": -1,
+    "dpd_late_autocorr_lag1_24m": 1,
+    "dpd_late_autocorr_lag2_24m": 1,
+    "income_detected": -1,
+    "thin_file": 1,
+    "declared_provided": 0,
+    "n_features_missing": 1
+  },
+  "best_iteration": 178,
+  "xgb_best_iteration": 386,
+  "pdo": 40.0,
+  "base_score": 600.0,
+  "base_odds": 20.0,
+  "bands": [
+    [
+      720.0,
+      "A"
+    ],
+    [
+      660.0,
+      "B"
+    ],
+    [
+      600.0,
+      "C"
+    ],
+    [
+      540.0,
+      "D"
+    ],
+    [
+      null,
+      "E"
+    ]
+  ],
+  "eval_gini": 0.40144992623597364,
+  "eval_gini_raw": 0.4037114090274876,
+  "eval_brier_raw": 0.17287257331558817,
+  "eval_brier_calibrated": 0.026223777434133472,
+  "eval_ece_calibrated": 0.004833856825907183,
+  "selection": {
+    "candidates": 58,
+    "kept": 17,
+    "min_iv": 0.005,
+    "null_runs": 30,
+    "null_pct": 95.0,
+    "corr_max": 0.9,
+    "perm_val_gini": 0.39957599562047275,
+    "perm_gini_drop": {
+      "pct_dpd_payments_24m": 0.015125191577891531,
+      "longest_clean_streak_24m": 0.014703418400664248,
+      "avg_overdue_amount_24m": 0.004352119488632011,
+      "debt_to_income": 0.006589457881815382,
+      "monthly_income": 0.014084610087851853,
+      "declared_income_type_code": 0.05467972604916634,
+      "declared_education_code": 0.026491184806425244,
+      "declared_employment_code": 0.027549449869104237,
+      "declared_income_gap": 0.0024394429271176556,
+      "agg_dpd_count": 0.01577423202850888,
+      "current_clean_streak_24m": 0.15490629535082068,
+      "dpd_late_autocorr_lag1_24m": 0.0020555705008584724,
+      "dpd_late_autocorr_lag2_24m": -1.0824685420685043e-05,
+      "income_detected": 0.0,
+      "thin_file": 0.0,
+      "declared_provided": 0.0004222584113768117,
+      "n_features_missing": 0.0005618721678696629
+    },
+    "forced_keep": [
+      "declared_provided",
+      "income_detected",
+      "n_features_missing",
+      "thin_file"
+    ]
+  },
+  "calibration": {
+    "tail": "hybrid",
+    "pd_floor": 0.007598784194528878,
+    "pd_floor_provisional": 0.0003,
+    "floor_policy": "lowest block with >=1 observed default(s)",
+    "ceiling_score": 708.2833196708682,
+    "ceiling_rests_on_obs": 681.0,
+    "ceiling_rests_on_defaults": 5.0,
+    "blocks": 57,
+    "moc_logodds": 0.0,
+    "central_tendency_applied": true,
+    "observed_default_rate": 0.02744880982013022,
+    "diagnostics": {
+      "n": 305332.0,
+      "frac_backbone_priced": 7.53278398595627e-05,
+      "frac_below_support": 6.5502469443098e-06,
+      "frac_above_support": 0.0,
+      "lower_plateau_knots": 8.0,
+      "upper_plateau_knots": 53.0,
+      "isotonic_pd_min": 0.0,
+      "isotonic_pd_max": 0.37735849056603776,
+      "pd_min": 0.007598784194528878,
+      "pd_max": 0.40362116376042917,
+      "mean_pd": 0.03125983045931695,
+      "ct_shift": -0.00223147013457492,
+      "moc_logodds": 0.0,
+      "backbone_slope": 3.5333601164665702,
+      "lower_plateau_z": -0.7370646646770496,
+      "upper_plateau_z": 0.5482576406778662,
+      "break_plateau": 1.0
+    }
+  },
+  "block_table": [
+    {
+      "block": 0,
+      "pd": 0.0,
+      "knots": 8,
+      "n": 23.0,
+      "k": 0.0
+    },
+    {
+      "block": 1,
+      "pd": 0.007598784194528878,
+      "knots": 189,
+      "n": 658.0,
+      "k": 5.0
+    },
+    {
+      "block": 2,
+      "pd": 0.00827357970215111,
+      "knots": 252,
+      "n": 1291.0,
+      "k": 14.0
+    },
+    {
+      "block": 3,
+      "pd": 0.010187667560321724,
+      "knots": 589,
+      "n": 4150.0,
+      "k": 39.0
+    },
+    {
+      "block": 4,
+      "pd": 0.010276679841897242,
+      "knots": 320,
+      "n": 1365.0,
+      "k": 13.0
+    },
+    {
+      "block": 5,
+      "pd": 0.010582010582010581,
+      "knots": 151,
+      "n": 380.0,
+      "k": 4.0
+    },
+    {
+      "block": 6,
+      "pd": 0.01131221719457013,
+      "knots": 231,
+      "n": 442.0,
+      "k": 5.0
+    },
+    {
+      "block": 7,
+      "pd": 0.012195121951219513,
+      "knots": 96,
+      "n": 194.0,
+      "k": 3.0
+    },
+    {
+      "block": 8,
+      "pd": 0.013986013986013993,
+      "knots": 1716,
+      "n": 7805.0,
+      "k": 114.0
+    },
+    {
+      "block": 9,
+      "pd": 0.015693112467305995,
+      "knots": 321,
+      "n": 1688.0,
+      "k": 20.0
+    },
+    {
+      "block": 10,
+      "pd": 0.015998528870908413,
+      "knots": 3835,
+      "n": 14708.0,
+      "k": 246.0
+    },
+    {
+      "block": 11,
+      "pd": 0.0162008910490077,
+      "knots": 670,
+      "n": 3636.0,
+      "k": 54.0
+    },
+    {
+      "block": 12,
+      "pd": 0.020170004322143782,
+      "knots": 2333,
+      "n": 7380.0,
+      "k": 141.0
+    },
+    {
+      "block": 13,
+      "pd": 0.021006408734868264,
+      "knots": 7744,
+      "n": 25130.0,
+      "k": 531.0
+    },
+    {
+      "block": 14,
+      "pd": 0.021105527638190954,
+      "knots": 379,
+      "n": 1924.0,
+      "k": 40.0
+    },
+    {
+      "block": 15,
+      "pd": 0.02120017520805957,
+      "knots": 3078,
+      "n": 11628.0,
+      "k": 244.0
+    },
+    {
+      "block": 16,
+      "pd": 0.02167414050822125,
+      "knots": 522,
+      "n": 2674.0,
+      "k": 58.0
+    },
+    {
+      "block": 17,
+      "pd": 0.0234375,
+      "knots": 1449,
+      "n": 3587.0,
+      "k": 84.0
+    },
+    {
+      "block": 18,
+      "pd": 0.02434625788999099,
+      "knots": 7178,
+      "n": 19962.0,
+      "k": 486.0
+    },
+    {
+      "block": 19,
+      "pd": 0.02527505203687185,
+      "knots": 2733,
+      "n": 6696.0,
+      "k": 170.0
+    },
+    {
+      "block": 20,
+      "pd": 0.026058631921824105,
+      "knots": 2072,
+      "n": 7390.0,
+      "k": 192.0
+    },
+    {
+      "block": 21,
+      "pd": 0.027759845061329905,
+      "knots": 443,
+      "n": 1443.0,
+      "k": 42.0
+    },
+    {
+      "block": 22,
+      "pd": 0.028619936939121963,
+      "knots": 846,
+      "n": 2858.0,
+      "k": 95.0
+    },
+    {
+      "block": 23,
+      "pd": 0.029961775275240896,
+      "knots": 15544,
+      "n": 43834.0,
+      "k": 1312.0
+    },
+    {
+      "block": 24,
+      "pd": 0.03474279558308648,
+      "knots": 9805,
+      "n": 23348.0,
+      "k": 790.0
+    },
+    {
+      "block": 25,
+      "pd": 0.0389453313981616,
+      "knots": 3493,
+      "n": 8431.0,
+      "k": 327.0
+    },
+    {
+      "block": 26,
+      "pd": 0.03895597974289054,
+      "knots": 1085,
+      "n": 2567.0,
+      "k": 100.0
+    },
+    {
+      "block": 27,
+      "pd": 0.04154766154944662,
+      "knots": 10609,
+      "n": 22409.0,
+      "k": 931.0
+    },
+    {
+      "block": 28,
+      "pd": 0.04397654584221749,
+      "knots": 1747,
+      "n": 2630.0,
+      "k": 121.0
+    },
+    {
+      "block": 29,
+      "pd": 0.04992076069730582,
+      "knots": 8179,
+      "n": 20821.0,
+      "k": 1024.0
+    },
+    {
+      "block": 30,
+      "pd": 0.05263157894736842,
+      "knots": 98,
+      "n": 156.0,
+      "k": 8.0
+    },
+    {
+      "block": 31,
+      "pd": 0.052991452991453004,
+      "knots": 313,
+      "n": 506.0,
+      "k": 29.0
+    },
+    {
+      "block": 32,
+      "pd": 0.05491456112165912,
+      "knots": 4338,
+      "n": 6057.0,
+      "k": 344.0
+    },
+    {
+      "block": 33,
+      "pd": 0.05627906976744188,
+      "knots": 4367,
+      "n": 9468.0,
+      "k": 518.0
+    },
+    {
+      "block": 34,
+      "pd": 0.06340057636887607,
+      "knots": 746,
+      "n": 1042.0,
+      "k": 66.0
+    },
+    {
+      "block": 35,
+      "pd": 0.068918426802622,
+      "knots": 7000,
+      "n": 10984.0,
+      "k": 757.0
+    },
+    {
+      "block": 36,
+      "pd": 0.08044295862933558,
+      "knots": 3552,
+      "n": 4786.0,
+      "k": 385.0
+    },
+    {
+      "block": 37,
+      "pd": 0.0838471023427867,
+      "knots": 2119,
+      "n": 2433.0,
+      "k": 204.0
+    },
+    {
+      "block": 38,
+      "pd": 0.09001636661211133,
+      "knots": 522,
+      "n": 611.0,
+      "k": 55.0
+    },
+    {
+      "block": 39,
+      "pd": 0.0906200317965024,
+      "knots": 517,
+      "n": 629.0,
+      "k": 57.0
+    }
+  ]
+}

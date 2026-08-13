@@ -1,0 +1,534 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ibex Credit</title>
+<style>
+:root{
+  --bg:#0b1a12; --panel:#11241a; --line:#1e3b2a; --ink:#e8f3ec;
+  --dim:#8fae9c; --gold:#d8a657; --green:#5fbf7f; --red:#cf6a5a;
+  --amber:#d8a657;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+a{color:var(--gold)}
+.wrap{max-width:1080px;margin:0 auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);padding:16px 24px;
+  background:var(--panel);position:sticky;top:0;z-index:10}
+.brand{font-weight:700;letter-spacing:.5px}
+.brand span{color:var(--gold)}
+nav{display:flex;gap:6px}
+nav button{background:transparent;border:1px solid transparent;color:var(--dim);
+  padding:7px 13px;border-radius:7px;cursor:pointer;font-size:14px}
+nav button.on{background:var(--bg);border-color:var(--line);color:var(--ink)}
+nav button:hover{color:var(--ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:22px;margin-bottom:18px}
+h1{font-size:26px;margin:0 0 6px}
+h2{font-size:18px;margin:0 0 14px}
+h3{font-size:15px;margin:18px 0 8px;color:var(--dim);
+  text-transform:uppercase;letter-spacing:.7px;font-weight:600}
+p.sub{color:var(--dim);margin:0 0 18px}
+label{display:block;font-size:13px;color:var(--dim);margin:12px 0 5px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);
+  color:var(--ink);padding:10px 12px;border-radius:8px;font-size:14px}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+button.go{background:var(--gold);border:0;color:#231703;font-weight:700;
+  padding:11px 18px;border-radius:8px;cursor:pointer;font-size:14px}
+button.go:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:transparent;border:1px solid var(--line);
+  color:var(--ink);padding:10px 16px;border-radius:8px;cursor:pointer}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+.ok{color:var(--green)}
+.hidden{display:none !important}
+.gauge{display:flex;align-items:baseline;gap:14px}
+.score{font-size:64px;font-weight:800;line-height:1}
+.band{font-size:22px;font-weight:700;padding:4px 14px;border-radius:8px;
+  background:var(--bg);border:1px solid var(--line)}
+.bar{height:10px;border-radius:6px;background:var(--bg);
+  border:1px solid var(--line);position:relative;margin:16px 0 6px;
+  overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold)}
+.scale{display:flex;justify-content:space-between;color:var(--dim);
+  font-size:12px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-top:16px}
+.kv div{background:var(--bg);border:1px solid var(--line);border-radius:9px;
+  padding:11px 13px}
+.kv b{display:block;font-size:19px;margin-bottom:2px}
+.kv small{color:var(--dim);font-size:12px}
+.issue{border-left:3px solid var(--red);background:var(--bg);
+  padding:11px 14px;border-radius:0 8px 8px 0;margin-bottom:9px}
+.issue b{display:block;margin-bottom:3px}
+.issue small{color:var(--dim)}
+.good{border-left-color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;
+  letter-spacing:.5px;position:sticky;top:0;background:var(--panel)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;
+  font-weight:700;border:1px solid var(--line)}
+.A{color:#7ee0a0;border-color:#2c5a3d}
+.B{color:#a8d98a;border-color:#3d5a2c}
+.C{color:var(--gold);border-color:#5a482c}
+.D{color:#e0a06a;border-color:#5a422c}
+.E{color:var(--red);border-color:#5a2c2c}
+.hash{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  word-break:break-all;color:var(--dim)}
+.warn{background:#2a1c0c;border:1px solid #5a482c;border-radius:9px;
+  padding:13px 15px;color:#e8d0a0;font-size:13px;margin:14px 0}
+.scroll{max-height:520px;overflow:auto;border:1px solid var(--line);
+  border-radius:9px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);
+  border-top-color:var(--gold);border-radius:50%;animation:s .8s linear infinite;
+  vertical-align:-2px;margin-right:7px}
+@keyframes s{to{transform:rotate(360deg)}}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;
+  padding:12px;overflow:auto;font-size:12px;max-height:280px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">IBEX <span>CREDIT</span></div>
+  <nav id="nav" class="hidden">
+    <button data-p="score" class="on">My score</button>
+    <button data-p="chain">On-chain</button>
+    <button data-p="admin" id="navAdmin" class="hidden">Admin</button>
+    <button data-p="out">Sign out</button>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ================= AUTH ================= -->
+<section id="pAuth">
+  <div class="card" style="max-width:430px;margin:40px auto">
+    <h1>Sign in</h1>
+    <p class="sub">Open-banking credit assessment.</p>
+    <div class="row" style="margin-bottom:8px">
+      <button class="ghost" id="tabIn">Sign in</button>
+      <button class="ghost" id="tabUp">Create account</button>
+    </div>
+    <div id="nameWrap" class="hidden">
+      <label>Full name</label><input id="aName" autocomplete="name">
+    </div>
+    <label>Email</label>
+    <input id="aEmail" type="email" autocomplete="email">
+    <label>Password</label>
+    <input id="aPass" type="password" autocomplete="current-password">
+    <div class="err" id="aErr"></div>
+    <button class="go" id="aGo" style="width:100%;margin-top:8px">Sign in</button>
+    <p class="sub" style="margin:14px 0 0;font-size:12px">
+      The first account created becomes the admin.
+    </p>
+  </div>
+</section>
+
+<!-- ================= MY SCORE ================= -->
+<section id="pScore" class="hidden">
+  <div class="card" id="connectCard">
+    <h1>Connect your bank</h1>
+    <p class="sub">We read up to 60 months of transaction history through
+      TrueLayer. Nothing is stored on-chain except a hash.</p>
+    <div class="warn">
+      <b>Sandbox:</b> choose <b>Mock Bank</b>, then sign in with
+      username <b>john</b> and password <b>doe</b>.
+    </div>
+    <button class="go" id="btnConnect">Connect bank</button>
+  </div>
+
+  <div class="card hidden" id="scoreCard">
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <h3 style="margin-top:0">Your credit score</h3>
+        <div class="gauge">
+          <div class="score" id="sVal">--</div>
+          <div class="band" id="sBand">-</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <small style="color:var(--dim)">Probability of default</small>
+        <div style="font-size:26px;font-weight:700" id="sPd">--</div>
+        <small style="color:var(--dim)" id="sPrev"></small>
+      </div>
+    </div>
+    <div class="bar"><i id="sBar" style="width:0%"></i></div>
+    <div class="scale"><span>300</span><span>540 E/D</span>
+      <span>600 C</span><span>660 B</span><span>720 A</span><span>900</span>
+    </div>
+    <div class="kv">
+      <div><b id="kIncome">--</b><small>Detected monthly income</small></div>
+      <div><b id="kLines">--</b><small>Credit lines found</small></div>
+      <div><b id="kHist">--</b><small>Months of history</small></div>
+      <div><b id="kFeat">--</b><small>Model features</small></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="issueCard">
+    <h2>What is holding your score back</h2>
+    <p class="sub">Ranked by the model's own contribution to your result.</p>
+    <div id="issues"></div>
+    <h3>Working in your favour</h3>
+    <div id="goods"></div>
+  </div>
+</section>
+
+<!-- ================= ON-CHAIN ================= -->
+<section id="pChain" class="hidden">
+  <div class="card">
+    <h1>On-chain record</h1>
+    <p class="sub">Your score is anchored as a hash. No personal data,
+      no score value, and no bank data ever reaches the chain.</p>
+    <div class="kv">
+      <div><b id="cNet">--</b><small>Network</small></div>
+      <div><b id="cId">--</b><small>Chain ID</small></div>
+      <div><b id="cReady">--</b><small>Submission</small></div>
+    </div>
+    <h3>Contract</h3>
+    <div class="hash" id="cAddr">--</div>
+    <div style="margin-top:8px"><a id="cAddrLink" target="_blank"
+      rel="noopener">View contract on explorer</a></div>
+    <div class="warn" id="cWarn">
+      <b>Live network.</b> Submitting writes a transaction to Polygon
+      mainnet. It costs MATIC and cannot be reversed or deleted.
+    </div>
+    <div class="row">
+      <button class="ghost" id="btnDry">Test locally (free)</button>
+      <button class="go" id="btnSubmit">Submit on-chain</button>
+    </div>
+    <div class="err" id="cErr"></div>
+  </div>
+
+  <div class="card hidden" id="proofCard">
+    <h2>Proof</h2>
+    <div id="proofRows"></div>
+    <h3>Explorer links</h3>
+    <div id="proofLinks"></div>
+    <h3>Log</h3>
+    <pre id="proofLog"></pre>
+  </div>
+</section>
+
+<!-- ================= ADMIN ================= -->
+<section id="pAdmin" class="hidden">
+  <div class="card">
+    <h1>Admin: cohort test</h1>
+    <p class="sub">Scores real applicants drawn at random from the held-out
+      evaluation slice, with a plain-language description of each file.
+      Uses the same booster and calibrator as the live dashboard.</p>
+    <div class="row">
+      <div style="width:110px"><label>How many</label>
+        <input id="coN" type="number" value="50" min="5" max="500"></div>
+      <div style="width:110px"><label>Seed</label>
+        <input id="coSeed" type="number" value="42"></div>
+      <div style="align-self:flex-end">
+        <button class="go" id="btnCohort">Run cohort</button></div>
+    </div>
+    <div class="err" id="coErr"></div>
+    <div id="coSummary" class="kv hidden"></div>
+  </div>
+  <div class="card hidden" id="coCard">
+    <h2>Results</h2>
+    <div class="scroll">
+      <table><thead><tr>
+        <th>#</th><th class="num">Score</th><th>Band</th><th class="num">PD</th>
+        <th>File description</th><th class="num">Oblig</th>
+        <th class="num">Max DPD</th><th class="num">DTI</th>
+        <th class="num">Income</th><th>Outcome</th>
+      </tr></thead><tbody id="coBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const show = (el, on) => el.classList.toggle('hidden', !on);
+let ME = null, MODE = 'in';
+
+async function api(path, opts){
+  const r = await fetch(path, Object.assign({
+    headers:{'Content-Type':'application/json'}, credentials:'same-origin'
+  }, opts||{}));
+  const t = await r.text();
+  let j; try{ j = t ? JSON.parse(t) : {}; }catch(e){ j = {detail:t}; }
+  if(!r.ok) throw new Error(j.detail || ('HTTP ' + r.status));
+  return j;
+}
+
+/* ---------- auth ---------- */
+$('#tabIn').onclick = () => setMode('in');
+$('#tabUp').onclick = () => setMode('up');
+function setMode(m){
+  MODE = m;
+  show($('#nameWrap'), m === 'up');
+  $('#aGo').textContent = m === 'up' ? 'Create account' : 'Sign in';
+  $('#aPass').autocomplete = m === 'up' ? 'new-password' : 'current-password';
+  $('#aErr').textContent = '';
+}
+
+$('#aGo').onclick = async () => {
+  $('#aErr').textContent = '';
+  const email = $('#aEmail').value.trim(), pass = $('#aPass').value;
+  if(!email || !pass){ $('#aErr').textContent = 'Enter an email and password.'; return; }
+  if(MODE === 'up' && pass.length < 8){
+    $('#aErr').textContent = 'Password must be at least 8 characters.'; return; }
+  $('#aGo').disabled = true;
+  try{
+    const url = MODE === 'up' ? '/api/v3/auth/signup' : '/api/v3/auth/login';
+    const body = MODE === 'up'
+      ? {email, password:pass, name:$('#aName').value.trim()}
+      : {email, password:pass};
+    await api(url, {method:'POST', body:JSON.stringify(body)});
+    await boot();
+  }catch(e){ $('#aErr').textContent = e.message; }
+  $('#aGo').disabled = false;
+};
+$('#aPass').addEventListener('keydown', e => { if(e.key === 'Enter') $('#aGo').click(); });
+
+/* ---------- nav ---------- */
+$('#nav').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const p = b.dataset.p;
+  if(p === 'out'){ await api('/api/v3/auth/logout', {method:'POST'});
+    ME = null; return boot(); }
+  document.querySelectorAll('#nav button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  show($('#pScore'), p === 'score');
+  show($('#pChain'), p === 'chain');
+  show($('#pAdmin'), p === 'admin');
+  if(p === 'chain') loadChain();
+});
+
+/* ---------- boot ---------- */
+async function boot(){
+  const s = await api('/api/v3/auth/session');
+  ME = s.user;
+  show($('#pAuth'), !ME);
+  show($('#nav'), !!ME);
+  show($('#pScore'), !!ME);
+  show($('#pChain'), false);
+  show($('#pAdmin'), false);
+  if(!ME) return;
+  show($('#navAdmin'), ME.role === 'admin');
+  // TrueLayer sends the browser back with ?tl=<token>
+  const tok = new URLSearchParams(location.search).get('tl');
+  if(tok){
+    history.replaceState({}, '', '/app');
+    await runScore(tok);
+  } else {
+    try{
+      const c = await api('/api/v3/score/current');
+      if(c.score) paint(c.score);
+    }catch(e){}
+  }
+}
+
+$('#btnConnect').onclick = async () => {
+  const j = await api('/api/v3/tl/connect-url');
+  location.href = j.url;
+};
+
+/* ---------- score ---------- */
+async function runScore(token){
+  $('#connectCard').innerHTML =
+    '<h1><span class="spin"></span>Scoring</h1>' +
+    '<p class="sub">Reading transactions and building features. ' +
+    'This takes a few seconds.</p>';
+  try{
+    const rec = await api('/api/v3/score/run',
+      {method:'POST', body:JSON.stringify({token, months:24})});
+    paint(rec);
+    // anchor automatically, locally, as soon as a score exists
+    autoAnchor();
+  }catch(e){
+    $('#connectCard').innerHTML =
+      '<h1>Could not score</h1><p class="err">' + e.message + '</p>' +
+      '<button class="go" onclick="location.href=\'/app\'">Try again</button>';
+  }
+}
+
+function paint(rec){
+  show($('#connectCard'), false);
+  show($('#scoreCard'), true);
+  show($('#issueCard'), true);
+  $('#sVal').textContent = rec.score;
+  $('#sBand').textContent = 'Band ' + rec.band;
+  $('#sBand').className = 'band ' + rec.band;
+  $('#sPd').textContent = rec.pd == null ? '--'
+    : (rec.pd * 100).toFixed(1) + '%';
+  $('#sBar').style.width =
+    Math.max(0, Math.min(100, (rec.score - 300) / 6)) + '%';
+  $('#sPrev').textContent = rec.previous_score
+    ? ('previously ' + rec.previous_score) : '';
+  $('#kIncome').textContent = rec.detected_income == null ? '--'
+    : '\u00a3' + Number(rec.detected_income).toFixed(2);
+  $('#kLines').textContent = rec.credit_lines == null ? '--' : rec.credit_lines;
+  $('#kHist').textContent = rec.history_months == null ? '--'
+    : Number(rec.history_months).toFixed(1);
+  $('#kFeat').textContent = rec.n_features == null ? '--' : rec.n_features;
+
+  $('#issues').innerHTML = (rec.issues && rec.issues.length)
+    ? rec.issues.map(i =>
+        '<div class="issue"><b>' + esc(i.title) + '</b><small>' +
+        esc(i.detail) + '</small></div>').join('')
+    : '<p class="sub">No material negative drivers were identified.</p>';
+  $('#goods').innerHTML = (rec.positive_factors || []).slice(0,5).map(f =>
+    '<div class="issue good"><b>' +
+    esc(String(f).replace(/_/g, ' ')) + '</b></div>').join('')
+    || '<p class="sub">None recorded.</p>';
+}
+
+function esc(s){ return String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ---------- chain ---------- */
+async function autoAnchor(){
+  try{
+    const r = await api('/api/v3/chain/submit',
+      {method:'POST', body:JSON.stringify({dry_run:false})});
+    renderProof(r);
+  }catch(e){ /* anchoring is optional; the score still stands */ }
+}
+
+async function loadChain(){
+  try{
+    const s = await api('/api/v3/chain/status');
+    $('#cNet').textContent = s.enabled ? s.network : 'local only';
+    $('#cId').textContent = s.chain_id || '--';
+    $('#cReady').textContent = s.chain_dir_set ? 'ready' : 'not configured';
+    $('#cAddr').textContent = s.contract;
+    if(s.contract_url){
+      $('#cAddrLink').href = s.contract_url;
+      $('#cAddrLink').textContent = 'View contract on ' + s.explorer_name;
+      show($('#cAddrLink'), true);
+    } else { show($('#cAddrLink'), false); }
+    show($('#cWarn'), s.network === 'polygon');
+    $('#btnSubmit').disabled = !s.chain_dir_set;
+    if(s.last) renderProof(s.last);
+  }catch(e){ $('#cErr').textContent = e.message; }
+}
+
+async function submitChain(dry){
+  $('#cErr').textContent = '';
+  if(!dry && !confirm(
+    'This writes a permanent transaction to the live network and spends ' +
+    'MATIC. Continue?')) return;
+  const btn = dry ? $('#btnDry') : $('#btnSubmit');
+  const old = btn.textContent;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Working';
+  try{
+    const r = await api('/api/v3/chain/submit',
+      {method:'POST', body:JSON.stringify({dry_run:dry})});
+    renderProof(r);
+    if(!r.ok) $('#cErr').textContent = r.error || 'submission failed';
+  }catch(e){ $('#cErr').textContent = e.message; }
+  btn.disabled = false; btn.textContent = old;
+}
+$('#btnDry').onclick = () => submitChain(true);
+$('#btnSubmit').onclick = () => submitChain(false);
+
+function renderProof(r){
+  show($('#proofCard'), true);
+  const h = r.hashes || {};
+  const label = {userHash:'User hash', scoreEventHash:'Score event hash',
+    modelVersionHash:'Model version hash', merkleRoot:'Merkle root',
+    txHash:'Transaction hash'};
+  $('#proofRows').innerHTML = Object.keys(label)
+    .filter(k => h[k])
+    .map(k => '<h3>' + label[k] + '</h3><div class="hash">' +
+      esc(h[k]) + '</div>').join('') ||
+    '<p class="sub">No hashes were reported by the chain script.</p>';
+  const L = r.links || {};
+  $('#proofLinks').innerHTML = Object.keys(L).length
+    ? Object.keys(L).map(k => '<div><a href="' + esc(L[k]) +
+        '" target="_blank" rel="noopener">' + esc(k) + ' on ' +
+        esc(r.explorer_name || 'explorer') + '</a></div>').join('')
+    : '<p class="sub">Local run \u2014 nothing was published, so there is ' +
+      'no explorer link. Submit on-chain to get one.</p>';
+  $('#proofLog').textContent = r.log || '';
+}
+
+/* ---------- admin ---------- */
+$('#btnCohort').onclick = async () => {
+  $('#coErr').textContent = '';
+  $('#btnCohort').disabled = true;
+  $('#btnCohort').innerHTML = '<span class="spin"></span>Running';
+  try{
+    await api('/api/v3/admin/cohort?n=' + ($('#coN').value || 50) +
+              '&seed=' + ($('#coSeed').value || 42) + '&refresh=true');
+    pollCohort();
+  }catch(e){
+    $('#coErr').textContent = e.message;
+    $('#btnCohort').disabled = false; $('#btnCohort').textContent = 'Run cohort';
+  }
+};
+
+async function pollCohort(){
+  try{
+    const s = await api('/api/v3/admin/cohort/status');
+    if(s.status === 'loading'){
+      $('#coErr').innerHTML = '<span class="spin"></span>' + esc(s.message);
+      return setTimeout(pollCohort, 2000);
+    }
+    $('#btnCohort').disabled = false; $('#btnCohort').textContent = 'Run cohort';
+    if(s.status === 'error'){ $('#coErr').textContent = s.message; return; }
+    $('#coErr').textContent = '';
+    drawCohort(s.rows);
+  }catch(e){
+    $('#coErr').textContent = e.message;
+    $('#btnCohort').disabled = false; $('#btnCohort').textContent = 'Run cohort';
+  }
+}
+
+function drawCohort(rows){
+  show($('#coCard'), true);
+  $('#coBody').innerHTML = rows.map(r =>
+    '<tr><td>' + r.n + '</td>' +
+    '<td class="num">' + r.score + '</td>' +
+    '<td><span class="pill ' + r.band + '">' + r.band + '</span></td>' +
+    '<td class="num">' + (r.pd * 100).toFixed(2) + '%</td>' +
+    '<td>' + esc(r.profile) + '</td>' +
+    '<td class="num">' + (r.obligations == null ? '' : r.obligations) + '</td>' +
+    '<td class="num">' + (r.max_dpd == null ? '' : r.max_dpd) + '</td>' +
+    '<td class="num">' + (r.dti == null ? '' : r.dti) + '</td>' +
+    '<td class="num">' + (r.income == null ? '' : r.income) + '</td>' +
+    '<td>' + (r.defaulted ? '<span style="color:var(--red)">defaulted</span>'
+                          : '<span style="color:var(--green)">repaid</span>') +
+    '</td></tr>').join('');
+
+  const n = rows.length;
+  const bands = {A:0,B:0,C:0,D:0,E:0};
+  rows.forEach(r => bands[r.band]++);
+  const bad = rows.filter(r => r.defaulted).length;
+  const avg = rows.reduce((a,r) => a + r.score, 0) / (n || 1);
+  const top = rows.slice(0, Math.ceil(n/2));
+  const bot = rows.slice(Math.ceil(n/2));
+  const rt = a => a.length ? (a.filter(r => r.defaulted).length / a.length * 100)
+    .toFixed(1) + '%' : '--';
+  show($('#coSummary'), true);
+  $('#coSummary').innerHTML =
+    '<div><b>' + n + '</b><small>Applicants</small></div>' +
+    '<div><b>' + avg.toFixed(0) + '</b><small>Mean score</small></div>' +
+    '<div><b>' + bad + '</b><small>Actually defaulted</small></div>' +
+    '<div><b>' + rt(top) + '</b><small>Default rate, top half</small></div>' +
+    '<div><b>' + rt(bot) + '</b><small>Default rate, bottom half</small></div>' +
+    '<div><b>' + ['A','B','C','D','E'].map(b => bands[b]).join(' / ') +
+    '</b><small>A / B / C / D / E</small></div>';
+}
+
+setMode('in');
+boot();
+</script>
+</body>
+</html>
+
+
+
