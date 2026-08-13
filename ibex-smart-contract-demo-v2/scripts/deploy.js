@@ -1,5 +1,8 @@
 const hre = require("hardhat");
-const { parsePositiveInteger } = require("./helpers");
+const {
+  getExplorerBaseUrl,
+  parsePositiveInteger
+} = require("./helpers");
 
 async function main() {
   const dailyLimit = parsePositiveInteger(
@@ -11,12 +14,23 @@ async function main() {
     "ScoreAuditRegistryV2"
   );
   const registry = await ScoreAuditRegistryV2.deploy(dailyLimit);
+  const deploymentTransaction = registry.deploymentTransaction();
+
+  console.log(`Transaction sent: ${deploymentTransaction.hash}`);
 
   await registry.waitForDeployment();
 
-  console.log(`ScoreAuditRegistryV2 deployed to: ${await registry.getAddress()}`);
+  const receipt = await deploymentTransaction.wait();
+  const actualFee = receipt.fee || receipt.gasUsed * receipt.gasPrice;
+  const contractAddress = await registry.getAddress();
+
+  console.log(`ScoreAuditRegistryV2 deployed to: ${contractAddress}`);
   console.log(`Daily submissions allowed per issuer: ${dailyLimit}`);
   console.log("The deployer is the owner and first approved issuer.");
+  console.log(`Gas used: ${receipt.gasUsed}`);
+  console.log(`Actual deployment fee: ${hre.ethers.formatEther(actualFee)} POL`);
+  console.log(`PolygonScan transaction: ${getExplorerBaseUrl()}/tx/${receipt.hash}`);
+  console.log(`PolygonScan contract: ${getExplorerBaseUrl()}/address/${contractAddress}`);
 }
 
 main().catch((error) => {

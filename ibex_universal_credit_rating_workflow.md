@@ -50,7 +50,7 @@ For a later real-user pilot, the preferred model input is a validated feature ve
 
 ## 3. Current Project Status
 
-The V1 blockchain demonstration is complete and running on Polygon PoS mainnet. A hardened `ScoreAuditRegistryV2` is implemented and tested in the repository but has not yet been deployed.
+The V1 blockchain demonstration and the hardened `ScoreAuditRegistryV2` are both deployed on Polygon PoS mainnet. V2 was deployed after 33 passing tests and an exact deployed-bytecode comparison.
 
 | Item | Current value |
 | --- | --- |
@@ -61,11 +61,22 @@ The V1 blockchain demonstration is complete and running on Polygon PoS mainnet. 
 | Demonstration proof transaction | [`0x4bc2b88411bd4d207d397d8fde35d8a31a6176c1ec9a51f5e50df852b70276e4`](https://polygonscan.com/tx/0x4bc2b88411bd4d207d397d8fde35d8a31a6176c1ec9a51f5e50df852b70276e4) |
 | Verification result | `VALID` |
 
+V2 deployment:
+
+| Item | Current value |
+| --- | --- |
+| Contract | [`0x8621D09F08C2f58803e7239F8D46D444e0eF63e1`](https://polygonscan.com/address/0x8621D09F08C2f58803e7239F8D46D444e0eF63e1) |
+| Deployment transaction | [`0x270dc86632630a365b6316cdd875548ccf3e34a36038e2b24360efbd7fff83b6`](https://polygonscan.com/tx/0x270dc86632630a365b6316cdd875548ccf3e34a36038e2b24360efbd7fff83b6) |
+| Owner and first issuer | `0x4bCa26d44634966C75abdBCec41DDf94a930a49c` |
+| Daily issuer limit | `1000` successful submissions per UTC day |
+| Deployment fee | `0.358027829338392128 POL` |
+| Bytecode verification | Exact match with local V2 artifact |
+
 The contract versions are separate standalone projects:
 
 ```text
 ibex-smart-contract-demo/       # V1, currently deployed
-ibex-smart-contract-demo-v2/    # V2, not yet deployed
+ibex-smart-contract-demo-v2/    # V2, deployed on Polygon mainnet
 ```
 
 Each folder has its own package files, contract, scripts, utilities, tests, environment example, and README. V1 has 15 passing tests and V2 has 33 passing tests.
@@ -619,23 +630,23 @@ Create a separate `.env` inside the V2 folder:
 ```text
 PRIVATE_KEY=your_polygon_issuer_private_key
 POLYGON_RPC_URL=https://polygon.drpc.org
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=
+SCORE_AUDIT_V2_CONTRACT_ADDRESS=0x8621D09F08C2f58803e7239F8D46D444e0eF63e1
 V2_DAILY_ISSUER_LIMIT=1000
 POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
 ```
 
-After review, its mainnet deployment flow is:
+For an intentional future V2 instance, the mainnet deployment flow is:
 
 ```bash
 npm run wallet:polygon
 npm run deploy:polygon
 ```
 
-Copy the resulting address into `SCORE_AUDIT_V2_CONTRACT_ADDRESS`. Inside the V2 folder, submission, reading, and verification use `submit:polygon`, `read:polygon`, and `verify:polygon`. V2 has not been deployed merely because these commands and scripts exist.
+For the current deployment, `SCORE_AUDIT_V2_CONTRACT_ADDRESS` is the address shown above. Inside the V2 folder, submission, reading, and verification use `submit:polygon`, `read:polygon`, and `verify:polygon`. Running `deploy:polygon` again creates a different independent contract and should happen only intentionally.
 
 ## 15. Contract Hardening Before a Real-User Pilot
 
-The V1 deployment is appropriate for the public demonstration. V2 implements the first hardening pass, but it must still be independently reviewed and deployed to a clearly communicated new address before it becomes the audit registry for real users.
+The V1 deployment is appropriate for the original public demonstration. V2 implements the first hardening pass and is deployed at a clearly recorded new address, but it must still receive independent review before it becomes the audit registry for real users.
 
 V1 has a fixed `owner` and no ownership-transfer function. V2 uses `Ownable2Step`, supports emergency pausing, rejects duplicate/monthly abuse, and limits each issuer's successful daily submissions.
 

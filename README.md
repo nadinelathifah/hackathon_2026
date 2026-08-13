@@ -7,7 +7,7 @@ This repository keeps the two smart-contract versions in separate standalone Har
 | Folder | Purpose | Deployment status |
 | --- | --- | --- |
 | [`ibex-smart-contract-demo`](./ibex-smart-contract-demo/) | Original V1 audit registry and scripts | Deployed on Polygon mainnet |
-| [`ibex-smart-contract-demo-v2`](./ibex-smart-contract-demo-v2/) | Protected V2 with monthly limits, duplicate prevention, issuer quotas, pausing, and two-step ownership | Implemented and tested, not yet deployed |
+| [`ibex-smart-contract-demo-v2`](./ibex-smart-contract-demo-v2/) | Protected V2 with monthly limits, duplicate prevention, issuer quotas, pausing, and two-step ownership | Deployed on Polygon mainnet |
 
 The existing V1 mainnet address is:
 
@@ -15,7 +15,13 @@ The existing V1 mainnet address is:
 0xD3da53b74Ce4d79d05D902059F8CC9Ec2a31e534
 ```
 
-Do not use that address as the V2 address. V2 requires a separate deployment.
+The V2 mainnet address is:
+
+```text
+0x8621D09F08C2f58803e7239F8D46D444e0eF63e1
+```
+
+Do not mix the V1 and V2 addresses in `.env` files or scripts.
 
 ## Test V1
 

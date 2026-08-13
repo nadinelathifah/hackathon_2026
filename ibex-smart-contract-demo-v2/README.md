@@ -2,7 +2,23 @@
 
 This is the standalone Hardhat project for the protected V2 Ibex Credit score audit registry.
 
-V1 remains in the sibling `ibex-smart-contract-demo` folder and is the version currently deployed on Polygon mainnet. V2 has not yet been deployed. It must receive a new contract address after review and deployment.
+V1 remains in the sibling `ibex-smart-contract-demo` folder. V2 was deployed to Polygon mainnet on 8 August 2026 after its local test and bytecode verification pass.
+
+## Live Polygon Mainnet Deployment
+
+| Item | Value |
+| --- | --- |
+| Network | Polygon PoS mainnet |
+| Chain ID | `137` |
+| Contract | [`0x8621D09F08C2f58803e7239F8D46D444e0eF63e1`](https://polygonscan.com/address/0x8621D09F08C2f58803e7239F8D46D444e0eF63e1) |
+| Deployment transaction | [`0x270dc86632630a365b6316cdd875548ccf3e34a36038e2b24360efbd7fff83b6`](https://polygonscan.com/tx/0x270dc86632630a365b6316cdd875548ccf3e34a36038e2b24360efbd7fff83b6) |
+| Block | `91665099` |
+| Confirmed at | `2026-08-08T15:24:36.000Z` |
+| Owner and first issuer | `0x4bCa26d44634966C75abdBCec41DDf94a930a49c` |
+| Daily successful-submission limit | `1000` per issuer per UTC day |
+| Deployment fee | `0.358027829338392128 POL` |
+
+The deployed runtime bytecode was read back from Polygon and exactly matched the local compiled `ScoreAuditRegistryV2` artifact. The registry was active, had no pending owner, and had the intended owner approved as its first issuer.
 
 ## How A User Interacts With Ibex
 
@@ -122,7 +138,7 @@ Create `.env` and configure:
 ```text
 PRIVATE_KEY=dedicated_wallet_private_key
 POLYGON_RPC_URL=https://polygon.drpc.org
-SCORE_AUDIT_V2_CONTRACT_ADDRESS=
+SCORE_AUDIT_V2_CONTRACT_ADDRESS=0x8621D09F08C2f58803e7239F8D46D444e0eF63e1
 V2_DAILY_ISSUER_LIMIT=1000
 POLYGON_EXPLORER_BASE_URL=https://polygonscan.com
 ```
@@ -133,11 +149,15 @@ Confirm the wallet and network:
 
 ```bash
 npm run wallet:polygon
+npm run estimate:polygon
+npm run inspect:polygon
 ```
 
-## Deploy V2
+The estimate command reads current Polygon fee data and estimates deployment gas without sending a transaction.
 
-Choose `V2_DAILY_ISSUER_LIMIT` based on expected legitimate daily volume. The deployment script defaults to `1000`, but the team should explicitly review that value.
+## Deploy A New V2 Instance
+
+The live V2 address is listed above. Run the deployment command again only when the team intentionally wants another contract instance. Choose `V2_DAILY_ISSUER_LIMIT` based on expected legitimate daily volume. The deployment script defaults to `1000`, but the team should explicitly review that value.
 
 Deploying to Polygon mainnet spends real POL:
 
@@ -205,6 +225,8 @@ ibex-smart-contract-demo-v2/
 
   scripts/
     checkWallet.js
+    estimateDeployment.js
+    inspectRegistry.js
     deploy.js
     demoLocalFlow.js
     submitScoreRoot.js
@@ -237,4 +259,4 @@ ibex-smart-contract-demo-v2/
 
 ## Deployment Status
 
-V2 is implemented and locally tested. It is not live merely because the source code exists in GitHub. A deployment is complete only after the team runs the deployment command, records the new address and transaction, verifies the bytecode, and communicates that address as the V2 registry.
+V2 is live at the address recorded above. No score-event proof has been submitted to V2 yet. The contract has passed the repository's automated tests and an exact deployed-bytecode comparison, but it has not received an independent security audit and must not yet be described as lender-production infrastructure.
