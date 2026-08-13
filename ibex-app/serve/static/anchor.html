@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ibex Credit - Score Anchoring</title>
+<style>
+  :root{
+    --bg:#0b1a12; --panel:#11241a; --panel2:#0e1f16; --line:#1e3b2a;
+    --ink:#e8f3ec; --dim:#8fae9d; --gold:#d8a657; --green:#5fbf7f; --red:#cf6a5a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:22px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--gold);margin:0 0 14px;font-weight:600}
+  label{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px}
+  input,select{width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:6px;padding:9px 11px;font-size:14px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--green)}
+  button{width:100%;margin-top:16px;padding:11px;border:0;border-radius:6px;
+    background:var(--green);color:#07130c;font-weight:600;font-size:14px;cursor:pointer}
+  button:disabled{background:#2a4536;color:#6b8878;cursor:not-allowed}
+  .note{font-size:12px;color:var(--dim);margin-top:10px;line-height:1.5}
+  .big{text-align:center;padding:14px 0 6px}
+  .score{font-size:52px;font-weight:700;letter-spacing:-1px;line-height:1}
+  .band{font-size:13px;color:var(--dim);margin-top:6px}
+  .rows{margin-top:16px;border-top:1px solid var(--line)}
+  .row{display:flex;justify-content:space-between;gap:12px;
+       padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .row span:first-child{color:var(--dim)}
+  .row span:last-child{font-variant-numeric:tabular-nums;text-align:right}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+      padding:12px;font-size:11.5px;line-height:1.45;overflow:auto;max-height:270px;
+      white-space:pre-wrap;word-break:break-word;margin:0;
+      font-family:ui-monospace,Consolas,monospace}
+  ol{margin:0;padding-left:20px;font-size:13px;color:var(--dim);line-height:1.85}
+  ol code{background:var(--panel2);padding:1px 5px;border-radius:4px;
+          color:var(--ink);font-size:12px}
+  .err{color:var(--red);font-size:12.5px;margin-top:10px;white-space:pre-wrap}
+  .ok{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score anchoring</h1>
+  <div class="sub">Score an applicant, inspect the Bayesian evidence, then write the event the smart contract hashes.</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1 &middot; Score</h2>
+
+      <label>Data source</label>
+      <select id="src">
+        <option value="live">TrueLayer (uses session token)</option>
+        <option value="manual">Enter a score manually</option>
+      </select>
+
+      <label>TrueLayer token <span id="tokhint" style="color:var(--dim)"></span></label>
+      <input id="token" placeholder="paste the tl=... value from the dashboard URL">
+
+      <label>Pseudonymous user id (never a real name)</label>
+      <input id="uid" value="ibex-demo-001">
+
+      <label>Manual score (only used for "Enter a score manually")</label>
+      <input id="manual" type="number" value="620">
+
+      <label>Previous score (optional)</label>
+      <input id="prev" type="number" value="600">
+
+      <label>Prior strength m (observations)</label>
+      <select id="m">
+        <option value="20">20 - trusting</option>
+        <option value="50">50</option>
+        <option value="100" selected>100 - recommended</option>
+        <option value="200">200</option>
+        <option value="500">500 - conservative</option>
+      </select>
+
+      <button id="go">Score and analyse</button>
+      <div class="note" id="note1">Sandbox mock users hold a fixed thin fixture - no cards or loans - so the score will be modest.</div>
+      <div class="err" id="err1"></div>
+    </div>
+
+    <div class="card">
+      <h2>2 &middot; Result and evidence</h2>
+      <div class="big">
+        <div class="score" id="scoreOut">&mdash;&mdash;</div>
+        <div class="band" id="bandOut">no score yet</div>
+      </div>
+      <div class="rows" id="rows"></div>
+      <div class="note" id="note2"></div>
+    </div>
+
+    <div class="card">
+      <h2>3 &middot; Event for the chain</h2>
+      <pre id="preview">Run a score first.</pre>
+      <button id="write" disabled>Write score-event.json</button>
+      <div class="note">Contains no name, no transactions, no income, no raw features - only the fields the contract guide permits.</div>
+      <div class="err" id="err2"></div>
+    </div>
+
+    <div class="card">
+      <h2>4 &middot; Anchor on Polygon</h2>
+      <ol>
+        <li>Test free and offline: <code>npm run demo</code> - must print <code>VALID</code></li>
+        <li>Submit for real: <code>npm run submit:polygon</code></li>
+        <li>Read it back: <code>npm run read:polygon</code></li>
+        <li>Prove it matches: <code>npm run verify:polygon</code></li>
+      </ol>
+      <div class="note">Steps 2 to 4 need an approved issuer wallet holding POL. Step 1 needs nothing and is what you should demo live - it proves the hashing and verification round trip without spending anything or depending on a network connection in the room.</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var state = { score:null, pd:null, band:null, evidence:null, live:null };
+
+  // The dashboard redirects back as  /?tl=<token>  after TrueLayer.
+  // If the user opens /anchor?tl=... we pick it up automatically.
+  var qs = new URLSearchParams(location.search);
+  if (qs.get("tl")) {
+    $("token").value = qs.get("tl");
+    $("tokhint").textContent = "(picked up from the URL)";
+  }
+
+  function num(v){
+    if (v === null || v === undefined) return null;
+    var n = typeof v === "number" ? v : parseFloat(v);
+    return isFinite(n) ? n : null;
+  }
+
+  // /api/score-live returns "any", so hunt for the field rather than assume.
+  function dig(obj, names){
+    if (!obj || typeof obj !== "object") return null;
+    var i, k;
+    for (i = 0; i < names.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(obj, names[i])) return obj[names[i]];
+    }
+    for (k in obj) {
+      if (obj[k] && typeof obj[k] === "object") {
+        var hit = dig(obj[k], names);
+        if (hit !== null && hit !== undefined) return hit;
+      }
+    }
+    return null;
+  }
+
+  function say(el, msg, good){
+    var e = $(el);
+    e.textContent = msg || "";
+    e.className = good ? "err ok" : "err";
+  }
+
+  function addRow(label, value){
+    var d = document.createElement("div");
+    d.className = "row";
+    d.innerHTML = "<span></span><span></span>";
+    d.children[0].textContent = label;
+    d.children[1].textContent = value;
+    $("rows").appendChild(d);
+  }
+
+  function fmtPct(x){ return x === null ? "--" : (x * 100).toFixed(2) + "%"; }
+
+  function render(){
+    $("rows").innerHTML = "";
+    $("scoreOut").textContent = state.score === null ? "--" : Math.round(state.score);
+    $("bandOut").textContent = state.band ? ("Band " + state.band) : "band unknown";
+
+    if (state.pd !== null) addRow("Probability of default", fmtPct(state.pd));
+
+    var ev = state.evidence || {};
+    var lo   = num(dig(ev, ["score_lower95","scoreLower95"]));
+    var hi   = num(dig(ev, ["score_upper95","scoreUpper95"]));
+    var post = num(dig(ev, ["pd_posterior_mean","posterior_mean"]));
+    var up95 = num(dig(ev, ["pd_upper95","upper95"]));
+    var nobs = num(dig(ev, ["n_obs","observations"]));
+    var kobs = num(dig(ev, ["k_obs","defaults"]));
+    var conf = num(dig(ev, ["confidence"]));
+
+    if (post !== null) addRow("Posterior mean PD", fmtPct(post));
+    if (up95 !== null) addRow("95% upper PD", fmtPct(up95));
+    if (lo !== null && hi !== null) addRow("95% score interval", Math.round(lo) + " - " + Math.round(hi));
+    if (nobs !== null) addRow("Observations near this score", Math.round(nobs));
+    if (kobs !== null) addRow("Defaults among them", Math.round(kobs));
+    if (conf !== null) addRow("Confidence band is correct", (conf * 100).toFixed(1) + "%");
+
+    if (state.pd !== null && nobs !== null) {
+      $("note2").textContent =
+        "Read this as: of people scoring near " + Math.round(state.score) + ", about " +
+        fmtPct(state.pd) + " defaulted. That is P(default given the score) - not " +
+        "P(scores like this given a defaulter), which is the far larger and far more " +
+        "misleading number.";
+    }
+
+    var body = eventBody();
+    $("preview").textContent = JSON.stringify(body, null, 2);
+    $("write").disabled = (state.score === null);
+  }
+
+  function eventBody(){
+    if (state.score === null) return { note: "Run a score first." };
+    var pos = [], neg = [];
+    var l = state.live || {};
+    var lp = dig(l, ["positive_factors","positiveFactors","top_positive"]);
+    var ln = dig(l, ["negative_factors","negativeFactors","top_negative"]);
+    if (Array.isArray(lp)) pos = lp.map(String).slice(0, 5);
+    if (Array.isArray(ln)) neg = ln.map(String).slice(0, 5);
+
+    var prev = num($("prev").value);
+    var b = {
+      user_id: $("uid").value || "ibex-demo-001",
+      score: Math.round(state.score),
+      prior_strength: parseFloat($("m").value)
+    };
+    if (state.pd !== null) b.pd = state.pd;
+    if (prev !== null) b.previous_score = Math.round(prev);
+    if (pos.length) b.positive_factors = pos;
+    if (neg.length) b.negative_factors = neg;
+    return b;
+  }
+
+  async function jfetch(url, opts){
+    var r = await fetch(url, opts);
+    var txt = await r.text();
+    var data = null;
+    try { data = JSON.parse(txt); } catch (e) { data = txt; }
+    if (!r.ok) {
+      var detail = data && data.detail ? JSON.stringify(data.detail) : String(txt).slice(0, 400);
+      throw new Error(r.status + " " + url + "\n" + detail);
+    }
+    return data;
+  }
+
+  $("go").addEventListener("click", async function(){
+    say("err1", ""); say("err2", "");
+    $("go").disabled = true;
+    $("go").textContent = "Working...";
+    try {
+      if ($("src").value === "live") {
+        var tok = $("token").value.trim();
+        if (!tok) throw new Error("No TrueLayer token.\nConnect on the dashboard first, then copy the tl=... value from its URL into the token box.");
+        var live = await jfetch("/api/score-live", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: tok })
+        });
+        state.live = live;
+        state.score = num(dig(live, ["score","credit_score"]));
+        state.pd    = num(dig(live, ["pd","probability_of_default","probability_default"]));
+        state.band  = dig(live, ["band","score_band","scoreBand"]);
+        if (state.score === null) throw new Error("Scored, but no score field found in the response:\n" + JSON.stringify(live).slice(0, 500));
+      } else {
+        state.live = null;
+        state.score = num($("manual").value);
+        state.pd = null;
+        state.band = null;
+        if (state.score === null) throw new Error("Enter a numeric score.");
+      }
+
+      var u = "/api/score-evidence?score=" + encodeURIComponent(state.score) +
+              "&prior_strength=" + encodeURIComponent($("m").value);
+      try {
+        state.evidence = await jfetch(u);
+        if (state.pd === null) state.pd = num(dig(state.evidence, ["pd","pd_point"]));
+        if (!state.band) state.band = dig(state.evidence, ["band"]);
+      } catch (e) {
+        state.evidence = null;
+        say("err1", "Score is fine, but the evidence lookup failed:\n" + e.message);
+      }
+      render();
+    } catch (e) {
+      say("err1", e.message);
+    } finally {
+      $("go").disabled = false;
+      $("go").textContent = "Score and analyse";
+    }
+  });
+
+  $("write").addEventListener("click", async function(){
+    say("err2", "");
+    $("write").disabled = true;
+    $("write").textContent = "Writing...";
+    try {
+      var res = await jfetch("/api/score-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventBody())
+      });
+      var where = dig(res, ["path","out_path","written_to"]);
+      say("err2", where ? ("Written to " + where + "\nNow run: npm run demo") : "Written.\nNow run: npm run demo", true);
+      var ev = dig(res, ["event"]) || res;
+      $("preview").textContent = JSON.stringify(ev, null, 2);
+    } catch (e) {
+      say("err2", e.message);
+    } finally {
+      $("write").disabled = false;
+      $("write").textContent = "Write score-event.json";
+    }
+  });
+
+  $("src").addEventListener("change", function(){
+    $("note1").textContent = $("src").value === "live"
+      ? "Sandbox mock users hold a fixed thin fixture - no cards or loans - so the score will be modest."
+      : "Manual mode skips TrueLayer entirely. Useful for testing the chain plumbing.";
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

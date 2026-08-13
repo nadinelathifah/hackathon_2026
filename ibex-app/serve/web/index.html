@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ibex Credit — A verified credential for people the system overlooks</title>
+<style>
+  .hero { position: relative; overflow: hidden; background: var(--bg-default); }
+  .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: var(--spacing-3xl) var(--spacing-2xl);
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xl); align-items: center; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-brand); text-transform: uppercase; }
+  .score-preview { background: var(--bg-subtle); border-radius: var(--radius-xl); padding: var(--spacing-lg); display: flex; flex-direction: column; gap: var(--spacing-md); box-shadow: var(--shadow-raised); }
+  .score-number { font-size: 44px; font-weight: 700; }
+  .how-it-works { background: var(--bg-subtle); padding: var(--spacing-3xl) var(--spacing-2xl); }
+  .how-it-works-inner { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--spacing-xl); }
+  .step-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); }
+  .step-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--spacing-sm); }
+  .trust { background: var(--bg-inverse); color: var(--text-inverse); padding: var(--spacing-3xl) var(--spacing-2xl); text-align: center; }
+  .trust-stats { display: flex; justify-content: center; gap: var(--spacing-3xl); margin-top: var(--spacing-xl); flex-wrap: wrap; }
+  .trust-stat-value { font-size: 24px; font-weight: 700; color: var(--lime-500); }
+  .cta-section { text-align: center; padding: var(--spacing-3xl) var(--spacing-2xl); }
+  footer { display: flex; justify-content: space-between; padding: var(--spacing-lg) var(--spacing-2xl); font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--border-default); flex-wrap: wrap; gap: var(--spacing-sm); }
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; padding: var(--spacing-xl) var(--spacing-lg); }
+    .step-grid { grid-template-columns: 1fr; }
+    .trust-stats { gap: var(--spacing-lg); }
+  }
+</style>
+<style>
+/* ==========================================================================
+   Ibex Credit — Design Tokens
+   Mirrors the Figma Foundations page: primitives → semantic tokens
+   ========================================================================== */
+
+.body{
+  background: url('step3\serve\web\WhatsApp Image 2026-08-08 at 12.47.39.jpeg') no-repeat center center;
+  background-size: cover;
+
+}
+:root {
+  /* --- Primitives: Forest (brand) --- */
+  --forest-50:  #EBFFF5;
+  --forest-100: #D4EEE4;
+  --forest-300: #5FA98C;
+  --forest-500: #1B5C46;
+  --forest-600: #124A38;
+  --forest-700: #0B3D2E;
+  --forest-900: #0B2A20;
+
+  /* --- Primitives: Lime (accent) --- */
+  --lime-50:  #F5FFE0;
+  --lime-100: #EAFFC2;
+  --lime-300: #DFFF9E;
+  --lime-500: #D0FF71;
+  --lime-600: #B9E85E;
+  --lime-700: #A0CC4A;
+
+  /* --- Primitives: Blue (links/focus) --- */
+  --blue-50:  #EAF0FF;
+  --blue-500: #4C7EFF;
+  --blue-600: #3A63D9;
+
+  /* --- Primitives: Gray --- */
+  --gray-50:  #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+
+  /* --- Primitives: Status --- */
+  --green-50: #ECFDF5; --green-100: #D1FAE5; --green-500: #10B981; --green-600: #059669; --green-700: #047857;
+  --amber-50: #FFFBEB; --amber-100: #FEF3C7; --amber-500: #F59E0B; --amber-600: #D97706; --amber-700: #B45309;
+  --red-50:   #FEF2F2; --red-100:   #FEE2E2; --red-500:   #EF4444; --red-600:   #DC2626; --red-700:   #B91C1C;
+
+  --white: #FFFFFF;
+  --black: #000000;
+
+  /* --- Semantic: Background --- */
+  --bg-default: var(--white);
+  --bg-subtle: var(--gray-50);
+  --bg-muted: var(--gray-100);
+  --bg-inverse: var(--forest-900);
+  --bg-brand: var(--forest-700);
+  --bg-brand-subtle: var(--forest-50);
+  --bg-accent: var(--lime-500);
+  --bg-accent-subtle: var(--lime-50);
+
+  /* --- Semantic: Text --- */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-500);
+  --text-disabled: var(--gray-400);
+  --text-inverse: var(--white);
+  --text-brand: var(--forest-600);
+  --text-link: var(--blue-500);
+
+  /* --- Semantic: Border --- */
+  --border-default: var(--gray-200);
+  --border-strong: var(--gray-300);
+  --border-brand: var(--forest-500);
+  --border-focus: var(--blue-500);
+
+  /* --- Semantic: Icon --- */
+  --icon-default: var(--gray-600);
+  --icon-inverse: var(--white);
+  --icon-brand: var(--forest-600);
+
+  /* --- Semantic: Credential status --- */
+  --status-verified-bg: var(--green-50);   --status-verified-text: var(--green-700);  --status-verified-icon: var(--green-600);  --status-verified-border: var(--green-100);
+  --status-pending-bg: var(--amber-50);    --status-pending-text: var(--amber-700);   --status-pending-icon: var(--amber-600);   --status-pending-border: var(--amber-100);
+  --status-rejected-bg: var(--red-50);     --status-rejected-text: var(--red-700);    --status-rejected-icon: var(--red-600);    --status-rejected-border: var(--red-100);
+  --status-expired-bg: var(--gray-100);    --status-expired-text: var(--gray-600);    --status-expired-icon: var(--gray-500);    --status-expired-border: var(--gray-300);
+
+  /* --- Spacing scale --- */
+  --spacing-2xs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* --- Radius scale --- */
+  --radius-none: 0px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- Typography --- */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* --- Elevation --- */
+  --shadow-subtle: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card: 0 2px 4px -1px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-raised: 0 8px 16px -4px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.05);
+  --shadow-modal: 0 20px 32px -8px rgba(0,0,0,0.16), 0 4px 8px -2px rgba(0,0,0,0.08);
+}
+/* ==========================================================================
+   Ibex Credit — Component Library
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* Visible focus ring everywhere (accessibility floor) */
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* --- Typography scale --- */
+.display-hero { font-size: 56px; line-height: 64px; font-weight: 700; letter-spacing: -1px; }
+.h1 { font-size: 36px; line-height: 44px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
+.h2 { font-size: 28px; line-height: 36px; font-weight: 700; margin: 0; }
+.h3 { font-size: 22px; line-height: 28px; font-weight: 600; margin: 0; }
+.h4 { font-size: 18px; line-height: 24px; font-weight: 600; margin: 0; }
+.body-lg { font-size: 16px; line-height: 24px; font-weight: 400; }
+.body-md { font-size: 14px; line-height: 20px; font-weight: 400; }
+.body-sm { font-size: 12px; line-height: 16px; font-weight: 400; }
+.label-lg { font-size: 14px; line-height: 20px; font-weight: 500; }
+.label-md { font-size: 12px; line-height: 16px; font-weight: 500; }
+.label-sm { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+
+/* ==========================================================================
+   Button
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-family);
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+.btn-medium { padding: var(--spacing-sm) var(--spacing-md); font-size: 14px; }
+.btn-large { padding: var(--spacing-md) var(--spacing-lg); font-size: 16px; }
+.btn-full { width: 100%; }
+
+.btn-primary { background: var(--bg-brand); color: var(--text-inverse); }
+.btn-primary:hover { background: var(--forest-600); }
+.btn-primary:disabled { background: var(--bg-muted); color: var(--text-disabled); cursor: not-allowed; }
+
+.btn-secondary { background: var(--bg-brand-subtle); color: var(--text-brand); border: 1.5px solid var(--border-brand); }
+.btn-secondary:hover { background: var(--forest-100); }
+.btn-secondary:disabled { background: var(--bg-muted); color: var(--text-disabled); border-color: var(--border-default); cursor: not-allowed; }
+
+.btn-ghost { background: transparent; color: var(--text-brand); }
+.btn-ghost:hover { background: var(--lime-50); }
+.btn-ghost:disabled { color: var(--text-disabled); cursor: not-allowed; }
+
+.btn-danger-outline { background: transparent; color: var(--status-rejected-text); border: 1.5px solid var(--status-rejected-border); }
+.btn-danger-outline:hover { background: var(--status-rejected-bg); }
+
+/* ==========================================================================
+   Badge
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-small { padding: var(--spacing-2xs) var(--spacing-sm); font-size: 11px; }
+.badge-medium { padding: var(--spacing-xs) var(--spacing-md); font-size: 12px; }
+.badge-neutral { background: var(--bg-muted); color: var(--text-secondary); }
+.badge-brand { background: var(--bg-brand-subtle); color: var(--text-brand); }
+.badge-success { background: var(--status-verified-bg); color: var(--status-verified-text); }
+.badge-warning { background: var(--status-pending-bg); color: var(--status-pending-text); }
+.badge-error { background: var(--status-rejected-bg); color: var(--status-rejected-text); }
+
+/* ==========================================================================
+   Verified Seal
+   ========================================================================== */
+.seal {
+  --seal-color: var(--status-verified-icon);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--seal-color);
+  flex-shrink: 0;
+  clip-path: polygon(
+    50% 0%, 61% 7%, 73% 2%, 80% 13%, 93% 13%, 95% 26%,
+    100% 35%, 92% 44%, 100% 53%, 92% 62%, 100% 71%, 93% 79%,
+    93% 87%, 80% 87%, 73% 98%, 61% 93%, 50% 100%, 39% 93%,
+    27% 98%, 20% 87%, 7% 87%, 7% 79%, 0% 71%, 8% 62%,
+    0% 53%, 8% 44%, 0% 35%, 5% 26%, 7% 13%, 20% 13%, 27% 2%, 39% 7%
+  );
+}
+.seal svg { width: 46%; height: 46%; }
+.seal-small { width: 32px; height: 32px; }
+.seal-medium { width: 48px; height: 48px; }
+.seal-large { width: 72px; height: 72px; }
+.seal-pending { --seal-color: var(--status-pending-icon); }
+.seal-rejected { --seal-color: var(--status-rejected-icon); }
+.seal-expired { --seal-color: var(--status-expired-icon); }
+
+/* ==========================================================================
+   Avatar
+   ========================================================================== */
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.avatar-small { width: 24px; height: 24px; font-size: 10px; }
+.avatar-medium { width: 32px; height: 32px; font-size: 12px; }
+.avatar-large { width: 48px; height: 48px; font-size: 18px; }
+.avatar-status {
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 32%; height: 32%;
+  border-radius: 50%;
+  background: var(--status-verified-icon);
+  border: 2px solid var(--bg-default);
+}
+
+/* ==========================================================================
+   Card
+   ========================================================================== */
+.card {
+  background: var(--bg-default);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-xl);
+}
+.card-elevated { border: none; box-shadow: var(--shadow-raised); }
+.card-inverse { background: var(--bg-inverse); border: none; }
+
+/* ==========================================================================
+   Input
+   ========================================================================== */
+.field { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+.field-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.field-input {
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-default);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field-input::placeholder { color: var(--text-disabled); }
+.field-input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(76,126,255,0.15); }
+.field-input.error { border-color: var(--status-rejected-border); }
+.field-input:disabled { background: var(--bg-muted); color: var(--text-disabled); cursor: not-allowed; }
+.field-helper { font-size: 12px; color: var(--text-secondary); }
+.field-helper.error { color: var(--status-rejected-text); }
+
+/* ==========================================================================
+   Toggle
+   ========================================================================== */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px; height: 22px;
+  cursor: pointer;
+}
+.toggle input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--gray-300);
+  border-radius: var(--radius-full);
+  transition: background-color 0.15s ease;
+}
+.toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--bg-default);
+  border-radius: 50%;
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.15s ease;
+}
+.toggle input:checked + .toggle-track { background: var(--bg-brand); }
+.toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(18px); }
+.toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+.toggle input:disabled + .toggle-track { opacity: 0.45; cursor: not-allowed; }
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background: var(--bg-inverse);
+}
+.nav-logo { display: flex; align-items: center; gap: var(--spacing-sm); }
+.nav-logo-mark {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-brand);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-logo-text { font-weight: 700; font-size: 18px; color: var(--text-inverse); }
+.nav-links { display: flex; align-items: center; gap: var(--spacing-lg); }
+.nav-link { font-size: 14px; font-weight: 500; color: var(--text-inverse); opacity: 0.65; transition: opacity 0.15s ease; }
+.nav-link:hover, .nav-link.active { opacity: 1; }
+.nav-link.active { color: var(--lime-500); opacity: 1; }
+.nav-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; }
+.nav-hamburger span { width: 20px; height: 2px; background: var(--text-inverse); border-radius: 1px; }
+
+/* ==========================================================================
+   Decorative background blobs
+   ========================================================================== */
+.blob-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+.blob-lime { background: var(--lime-500); opacity: 0.12; }
+.blob-blue { background: var(--blue-500); opacity: 0.10; }
+
+/* ==========================================================================
+   Utility
+   ========================================================================== */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--spacing-xs); } .gap-sm { gap: var(--spacing-sm); } .gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); } .gap-xl { gap: var(--spacing-xl); }
+.text-secondary { color: var(--text-secondary); }
+.text-brand { color: var(--text-brand); }
+.text-link { color: var(--text-link); }
+.divider { height: 1px; background: var(--border-default); border: none; margin: 0; width: 100%; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+/* ==========================================================================
+   Ibex Credit — Page Layout & Responsive Rules
+   Breakpoint convention: desktop-first, collapsing at 860px (tablet/mobile)
+   ========================================================================== */
+
+.page { min-height: 100vh; background: var(--bg-subtle); }
+.page-body {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+.page-body-wide { max-width: 1040px; }
+.page-body-narrow { max-width: 560px; }
+
+/* Hero split layout (auth screens) */
+.split-hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.split-hero-panel {
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  padding: var(--spacing-3xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+.split-hero-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+}
+
+/* Grid of option/profile cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Two-column dashboard layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+/* ==========================================================================
+   Responsive — collapses to mobile-web pattern at 860px
+   ========================================================================== */
+@media (max-width: 860px) {
+  .nav { padding: var(--spacing-md) var(--spacing-lg); }
+  .nav-links { display: none; }
+  .nav-links.nav-links-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px; left: 0; right: 0;
+    background: var(--bg-inverse);
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-md);
+    z-index: 20;
+    box-shadow: var(--shadow-modal);
+  }
+  .nav { position: relative; }
+  .nav-hamburger { display: flex; }
+
+  .page-body { padding: var(--spacing-lg); gap: var(--spacing-lg); }
+
+  .split-hero { grid-template-columns: 1fr; min-height: auto; }
+  .split-hero-panel { padding: var(--spacing-xl) var(--spacing-lg); text-align: left; }
+  .split-hero-form { padding: var(--spacing-xl) var(--spacing-lg); }
+
+  .card-grid { grid-template-columns: 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+
+  .h1 { font-size: 28px; line-height: 34px; }
+  .display-hero { font-size: 36px; line-height: 42px; }
+}
+
+@media (max-width: 480px) {
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .page-body { padding: var(--spacing-md); }
+}
+
+</style>
+<style id="ibex-hero-bg-css">
+/* section 1 background artwork — white with blue + lime glow */
+.ibex-hero-bg {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(64, 116, 247, 0.397), transparent 32%),
+    radial-gradient(circle at 78% 25%, rgba(208, 255, 113, 0.26), transparent 38%),
+    radial-gradient(circle at 78% 60%, rgba(208, 255, 113, 0.18), transparent 26%),
+    #ffffff;
+}
+
+@media (max-width: 820px){
+  .ibex-hero-bg {
+    background:
+      radial-gradient(circle at 10% 12%, rgba(76, 126, 255, 0.18), transparent 32%),
+      radial-gradient(circle at 70% 42%, rgba(208, 255, 113, 0.26), transparent 40%),
+      #ffffff;
+  }
+}
+.hero .score-preview {
+  position: relative;
+}
+
+.hero .score-preview::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle, rgba(208, 255, 113, 0.205) 0%, transparent 70%);
+  z-index: -1;
+}
+.ibex-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-inverse);
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.ibex-loader.ibex-loader-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ibex-loader-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-brand);
+  box-shadow: 0 0 0 0 rgba(208, 255, 113, 0.5);
+  animation: ibex-pulse 1.2s ease-out infinite;
+}
+
+@keyframes ibex-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(208, 255, 113, 0.45); }
+  70%  { box-shadow: 0 0 0 22px rgba(208, 255, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(208, 255, 113, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ibex-loader-mark { animation: none; }
+}
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+</style>
+</head>
+<body>
+<div id="ibex-loader" class="ibex-loader">
+  <div class="ibex-loader-mark">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+      <path d="M2 20L8.5 7l3.5 6 1.8-2.8L22 20H2z" fill="white"/>
+      <path d="M8.5 7l3.5 6 1.8-2.8L22 20H13.8z" fill="var(--lime-500)"/>
+    </svg>
+  </div>
+</div>
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 20L8.5 7l3.5 6 1.8-2.8L22 20H2z" fill="white"/><path d="M8.5 7l3.5 6 1.8-2.8L22 20H13.8z" fill="var(--lime-500)"/></svg></div>
+    <span class="nav-logo-text">Ibex Credit</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="/home#how-it-works">How it works</a>
+    <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+    <a class="nav-link" href="/static/blockchain-proof.html">Security</a>
+    <a class="nav-link" href="/static/model.html">The model</a>
+    <a class="nav-link" href="/static/business.html">For businesses</a>
+  </div>
+  <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <a href="/static/signup.html" class="btn btn-secondary btn-medium">Run the demo</a>
+</nav>
+
+<section class="ibex-hero-bg hero">
+  <div class="blob-bg">
+    <div class="blob blob-lime" style="width:560px;height:560px;top:-180px;right:-100px;"></div>
+    <div class="blob blob-blue" style="width:460px;height:460px;top:220px;left:-160px;"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="flex-col gap-md">
+      <span class="eyebrow">Blockchain-verified · Privacy-first</span>
+      <h1 class="h1">A verified credential for people the system overlooks.</h1>
+      <p class="body-lg text-secondary">Ibex Credit turns consented financial behaviour into a verified, explainable credential. No immigration status, employer, or address required.</p>
+      <div class="flex gap-sm" style="margin-top: var(--spacing-sm);">
+        <a href="/static/signup.html" class="btn btn-primary btn-large">Run the demo</a>
+        <a href="#how-it-works" class="btn btn-ghost btn-large">How it works</a>
+      </div>
+    </div>
+    <div class="score-preview">
+      <div class="flex justify-between items-center">
+        <span class="body-md text-secondary">Your Ibex Credential</span>
+        <div class="seal seal-medium"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="flex items-center gap-sm">
+        <span class="score-number">680</span>
+        <span class="badge badge-warning badge-medium">Band B &middot; Strong</span>
+      </div>
+      <hr class="divider">
+      <span class="body-sm text-link">Verified on Polygon ↗</span>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works" id="how-it-works">
+  <div class="how-it-works-inner">
+    <h2 class="h2" style="text-align:center;">How it works</h2>
+    <div class="step-grid">
+      <div class="card">
+        <div class="step-icon" style="background: var(--forest-700);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="white" stroke-width="1.8"/><circle cx="9" cy="11" r="2" stroke="white" stroke-width="1.8"/></svg></div>
+        <h4 class="h4">Sign up &amp; answer 4 questions</h4>
+        <p class="body-sm text-secondary">Income, work and housing — optional, answered in seconds. No documents, no employer letter.</p>
+      </div>
+      <div class="card">
+        <div class="step-icon" style="background: var(--lime-600);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h4 class="h4">See your credential</h4>
+        <p class="body-sm text-secondary">Connect your bank (read-only). Get a score, a band, a probability of default with its uncertainty interval, and plain-English reasons.</p>
+      </div>
+      <div class="card">
+        <div class="step-icon" style="background: var(--blue-600);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.8"/><path d="M9 10l6 4" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h4 class="h4">Verify on-chain</h4>
+        <p class="body-sm text-secondary">A cryptographic proof is anchored to Polygon — auditable and tamper-evident.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works" id="model">
+  <div class="how-it-works-inner">
+    <h2 class="h2" style="text-align:center;">The model, in numbers</h2>
+    <div class="step-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="card"><h4 class="h4">1,526,659</h4><p class="body-sm text-secondary">real credit applications the model trained on</p></div>
+      <div class="card"><h4 class="h4">0.39</h4><p class="body-sm text-secondary">eval Gini, 95% CI [0.36, 0.41] via 500-replicate block bootstrap over origination weeks</p></div>
+      <div class="card"><h4 class="h4">74 &rarr; 16</h4><p class="body-sm text-secondary">candidate features reduced by a four-gate funnel, including a 30-shuffle null-importance test</p></div>
+      <div class="card"><h4 class="h4">0.006</h4><p class="body-sm text-secondary">expected calibration error after isotonic (PAVA) calibration</p></div>
+      <div class="card"><h4 class="h4">0.93</h4><p class="body-sm text-secondary">mean feature-level match rate between open-banking reconstruction and bureau originals</p></div>
+      <div class="card"><h4 class="h4">24 months</h4><p class="body-sm text-secondary">of transaction history read, with your consent, revoked any time</p></div>
+      <div class="card"><h4 class="h4">305,332</h4><p class="body-sm text-secondary">held-out later-week applicants the reported numbers are measured on</p></div>
+      <div class="card"><h4 class="h4">410&ndash;697</h4><p class="body-sm text-secondary">today's score range -- the ceiling is anchored to observed evidence, not a fantasy 900</p></div>
+    </div>
+  </div>
+</section>
+<section id="model-in-depth" class="mtz" data-build="ibex-pages-v6">
+<style>
+.mtz{background:#0B2A20;padding:84px 0}
+.mtz .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.mtz .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5FA98C;font-weight:700;margin:0 0 14px}
+.mtz h2{font-size:38px;line-height:1.14;letter-spacing:-.02em;color:#fff;margin:0 0 16px;font-weight:700;max-width:20ch}
+.mtz p.l{font-size:17px;line-height:1.62;color:#B9CFC5;max-width:62ch;margin:0 0 36px}
+.mtz .st{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin:0 0 36px}
+.mtz .st div{border-top:1px solid #1E5745;padding:16px 0 0}
+.mtz .st b{display:block;font-size:28px;color:#D0FF71;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mtz .st small{display:block;font-size:12.5px;color:#8FB3A6;margin-top:4px;line-height:1.4}
+.mtz a.go{display:inline-block;background:#D0FF71;color:#0B2A20;font-weight:650;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none}
+.mtz a.go:hover{background:#B9E85E}
+@media(max-width:640px){.mtz h2{font-size:28px}}
+</style>
+<div class="wrap">
+<p class="eyebrow">About the model</p>
+<h2>How a score is produced, and what it can honestly claim</h2>
+<p class="l">The full documentation covers where the data comes from, all sixteen features, the scoring mechanics, how the result is proved on chain, how the error bars are calculated, and where the model falls short.</p>
+<div class="st">
+<div><b>0.3835</b><small>Gini, 95% CI 0.3613 to 0.4146</small></div>
+<div><b>16</b><small>features, from 74 candidates</small></div>
+<div><b>305,332</b><small>evaluation rows, 32 weeks</small></div>
+<div><b>697.4</b><small>score ceiling, PD floor 0.92%</small></div>
+</div>
+<a class="go" href="/static/model.html">Read the full model documentation &rarr;</a>
+</div>
+</section>
+<section id="faq" class="ifq">
+<style>
+.ifq{background:#F9FAFB;padding:84px 0;border-top:1px solid #E5E7EB}
+.ifq .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+.ifq .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5FA98C;font-weight:700;margin:0 0 12px;text-align:center}
+.ifq h2{font-size:36px;line-height:1.15;letter-spacing:-.02em;color:#0B2A20;margin:0 0 44px;font-weight:700;text-align:center}
+.ifq details{background:#fff;border:1px solid #E5E7EB;border-radius:14px;margin:0 0 12px;overflow:hidden}
+.ifq details[open]{border-color:#D4EEE4}
+.ifq summary{cursor:pointer;padding:19px 54px 19px 24px;font-size:16px;font-weight:600;color:#111827;list-style:none;position:relative}
+.ifq summary::-webkit-details-marker{display:none}
+.ifq summary::after{content:"+";position:absolute;right:24px;top:17px;font-size:21px;font-weight:400;color:#5FA98C}
+.ifq details[open] summary::after{content:"\2212"}
+.ifq .a{padding:0 24px 20px;font-size:15px;line-height:1.66;color:#4B5563}
+.ifq .a p{margin:0 0 10px}
+.ifq .a p:last-child{margin:0}
+.ifq .more{text-align:center;margin:32px 0 0;font-size:14.5px;color:#6B7280}
+.ifq .more a{color:#0B3D2E;font-weight:600}
+@media(max-width:640px){.ifq h2{font-size:27px}}
+</style>
+<div class="wrap">
+<p class="eyebrow">FAQ</p>
+<h2>Questions people actually ask</h2>
+
+<details><summary>Do I need a UK credit history?</summary><div class="a"><p>No. That is the point of the service. The score is built from how you have actually handled money over the last 24 months in your bank account, not from a credit file you may not have.</p><p>If you have recently moved to the UK and no lender can see you, this gives you something to show them.</p></div></details>
+
+<details><summary>Will this affect my credit file?</summary><div class="a"><p>No. Nothing is recorded with a credit reference agency, no search is left on your file, and Ibex is not itself a credit reference agency. Running a score here is invisible to any other lender unless you choose to share the result.</p></div></details>
+
+<details><summary>What exactly can you see in my bank account?</summary><div class="a"><p>Account details, balances, up to 24 months of transactions, and the account-holder record your bank holds for you. Access is read-only: no payment can be initiated, and nothing can be moved.</p></div></details>
+
+<details><summary>Do you store my banking login?</summary><div class="a"><p>No, and we never see it. You authenticate on your own bank’s website. The bank returns a scoped, expiring token to us, which grants exactly the permissions you approved and nothing else.</p></div></details>
+
+<details><summary>Can I withdraw access later?</summary><div class="a"><p>Yes, at any time, from your bank’s own app or website, without asking us. Open-banking consent is time-limited by design and lapses on its own if it is not renewed.</p></div></details>
+
+<details><summary>Why is my score capped? Why can nobody get band A?</summary><div class="a"><p>The model refuses to claim a risk lower than 0.92%, because below that level the data contains too few comparable applicants to support the claim. That floor caps the score at 697.4.</p><p>Band A starts at 720, so it is currently unreachable. That is deliberate. Awarding a top band would mean asserting a level of certainty the evidence does not carry.</p></div></details>
+
+<details><summary>Why does declared information matter if you cannot verify it?</summary><div class="a"><p>It adds context the transactions alone do not carry, such as whether income is salaried or self-employed. It is genuinely predictive, which is why it is in the model.</p><p>It is also optional, and leaving it blank is recorded as its own fact rather than treated as a negative. Because it cannot be verified from a bank feed, it is suitable for pricing but should not carry an underwriting decision on its own.</p></div></details>
+
+<details><summary>What is actually stored on the blockchain?</summary><div class="a"><p>Only hashes. Your name, your transactions and even your score are never written to the chain. A hash proves a specific record existed at a specific time without revealing anything inside it.</p><p>It means a lender can confirm a score has not been edited, while your financial data stays in the encrypted database.</p></div></details>
+
+<details><summary>Is this a lending decision?</summary><div class="a"><p>No. Ibex returns a probability and a band and declines no one. What a lender does with that, and the policy behind it, remains entirely theirs.</p></div></details>
+
+<details><summary>How accurate is it, honestly?</summary><div class="a"><p>A Gini of 0.3835, with a 95% confidence interval of 0.3613 to 0.4146. That is respectable for a model built without any credit-bureau data, and well short of what a major lender achieves with a full credit file.</p><p>Every score is published with its own interval rather than a single number, because a model that cannot state its own uncertainty should not be trusted with the decision.</p></div></details>
+
+<details><summary>What if I have barely any transaction history?</summary><div class="a"><p>A thin-file flag is set and carried through the model explicitly, so a short history is treated as missing evidence rather than as evidence of risk. You will still get a score, with a wider interval around it.</p></div></details>
+
+<p class="more">Still curious? The <a href="/static/model.html">full model documentation</a> covers the pipeline, every feature and the statistics.</p>
+</div>
+</section>
+<section class="trust">
+
+  <h2 class="h2">On-chain proof, off-chain privacy</h2>
+  <p class="body-md" style="opacity:0.75; max-width: 640px; margin: var(--spacing-sm) auto 0;">Your bank authenticates you directly; transactions are read-only and processed inside the scoring session. Only a salted cryptographic hash of each score event is anchored to Polygon — no transactions, no name, no PII on-chain.</p>
+  <div class="trust-stats">
+    <div><div class="trust-stat-value">Polygon PoS</div><div class="body-sm" style="opacity:0.6;">Network</div></div>
+    <div><div class="trust-stat-value">VALID</div><div class="body-sm" style="opacity:0.6;">Verification</div></div>
+    <div><div class="trust-stat-value">4</div><div class="body-sm" style="opacity:0.6;">optional questions, no documents</div></div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2 class="h2">Get your credential in under a minute.</h2>
+  <a href="/static/signup.html" class="btn btn-primary btn-large" style="margin-top: var(--spacing-md);">Run the demo</a>
+</section>
+
+<footer>
+  <span>© 2026 Ibex Credit. Demo runs on the TrueLayer sandbox bank; the model is trained on 1,526,659 real credit applications.</span>
+  <a href="#" class="text-link">View contract on PolygonScan ↗</a>
+</footer>
+
+<script>
+/**
+ * Ibex Credit — shared interactivity
+ * Vanilla JS, no dependencies.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMobileNav();
+  initDocumentUpload();
+  initInputValidation();
+});
+document.addEventListener('DOMContentLoaded', () => {
+  initPageLoader();
+  initMobileNav();
+  initDocumentUpload();
+  initInputValidation();
+});
+/* --------------------------------------------------------------------
+   Mobile nav: hamburger reveals the nav links as a stacked menu
+   -------------------------------------------------------------------- */
+function initMobileNav() {
+  document.querySelectorAll('.nav-hamburger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const nav = btn.closest('.nav');
+      const links = nav.querySelector('.nav-links');
+      const isOpen = links.classList.toggle('nav-links-open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+    });
+  });
+}
+function initPageLoader() {
+  const loader = document.getElementById('ibex-loader');
+  if (!loader) return;
+  window.addEventListener('load', () => {
+    loader.classList.add('ibex-loader-hidden');
+    setTimeout(() => loader.remove(), 500);
+  });
+}
+/* --------------------------------------------------------------------
+   Document Upload screen: Submit stays disabled until both required
+   files are marked uploaded. Clicking "Choose file" simulates a
+   successful upload (no real file picker wiring needed for a demo).
+   -------------------------------------------------------------------- */
+function initDocumentUpload() {
+  const dropzones = document.querySelectorAll('[data-dropzone]');
+  const submitBtn = document.querySelector('[data-submit-verification]');
+  if (!dropzones.length || !submitBtn) return;
+
+  const uploadedState = {};
+  dropzones.forEach((zone) => {
+    const key = zone.dataset.dropzone;
+    uploadedState[key] = false;
+    const button = zone.querySelector('button');
+    button.addEventListener('click', () => {
+      uploadedState[key] = true;
+      renderUploadedFile(zone, key);
+      updateSubmitState();
+    });
+  });
+
+  function renderUploadedFile(zone, key) {
+    zone.classList.add('dropzone-done');
+    const status = zone.querySelector('[data-upload-status]');
+    if (status) {
+      status.textContent = '✓ Uploaded';
+      status.classList.add('text-brand');
+    }
+  }
+
+  function updateSubmitState() {
+    const allUploaded = Object.values(uploadedState).every(Boolean);
+    submitBtn.disabled = !allUploaded; // native :disabled styles handle the visual state
+  }
+
+  updateSubmitState();
+}
+
+/* --------------------------------------------------------------------
+   Basic field validation feedback (required + email format) —
+   purely visual, no network calls.
+   -------------------------------------------------------------------- */
+function initInputValidation() {
+  document.querySelectorAll('form[data-validate]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+      form.querySelectorAll('[required]').forEach((input) => {
+        const helper = input.closest('.field')?.querySelector('.field-helper');
+        if (!input.value.trim()) {
+          valid = false;
+          input.classList.add('error');
+          if (helper) { helper.textContent = 'This field is required.'; helper.classList.add('error'); }
+        } else if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
+          valid = false;
+          input.classList.add('error');
+          if (helper) { helper.textContent = 'Enter a valid email address.'; helper.classList.add('error'); }
+        } else {
+          input.classList.remove('error');
+          if (helper) helper.classList.remove('error');
+        }
+      });
+      if (valid) {
+        const redirect = form.dataset.redirect;
+        if (redirect) window.location.href = redirect;
+      }
+    });
+  });
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: ibex-credit
+    runtime: docker
+    plan: free
+    # Non-secret config is baked into the image via Dockerfile ENV:
+    #   IBEX_ARTIFACTS, OBCREDIT_ARTIFACTS, IBEX_CHAIN_DIR=/app/chain,
+    #   IBEX_CHAIN_NETWORK=polygon, SCORE_EVENT_FILE=./score-event.json
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: TRUELAYER_SANDBOX
+        value: "1"
+      - key: IBEX_CHAIN_NETWORK
+        value: polygon
+      - key: SCORE_AUDIT_V2_CONTRACT_ADDRESS
+        value: 0x8621D09F08C2f58803e7239F8D46D444e0eF63e1
+      - key: POLYGON_RPC_URL
+        value: https://polygon-bor-rpc.publicnode.com
+      # secrets -- set these in the Render dashboard, never in the repo:
+      - key: TRUELAYER_CLIENT_ID
+        sync: false
+      - key: TRUELAYER_CLIENT_SECRET
+        sync: false
+      - key: TRUELAYER_REDIRECT_URI
+        sync: false        # https://<your-service>.onrender.com/callback
+      - key: PRIVATE_KEY   # issuer wallet key -- the chain scripts pick it up
+        sync: false
+      - key: USER_SALT     # must be byte-identical to every anchor so far
+        sync: false

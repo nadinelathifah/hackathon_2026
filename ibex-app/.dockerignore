@@ -1,0 +1,15 @@
+.git
+**/__pycache__
+**/*.pyc
+**/*.bak
+**/*.sebak
+**/*.bizbak
+**/*.advbak
+chain/node_modules
+chain/artifacts
+chain/cache
+chain/.env
+serve/_anchors
+serve/users.json
+score-event.json
+.env

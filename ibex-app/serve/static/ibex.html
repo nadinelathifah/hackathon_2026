@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ibex Credit</title>
+<style>
+:root{--bg:#F9FAFB;--panel:#FFFFFF;--line:#E5E7EB;--ink:#111827;
+--mut:#6B7280;--gold:#1B5C46;--green:#059669;--red:#DC2626;--blue:#3A63D9;
+--forest:#0B3D2E;--lime:#D0FF71}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.55 'Inter',ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+header{display:flex;align-items:center;gap:14px;padding:14px 28px;
+background:#0B2A20;position:sticky;top:0;z-index:9}
+.logo{font-weight:700;letter-spacing:.4px;font-size:17px;color:#FFFFFF}
+.logo span{color:var(--lime)}
+.grow{flex:1}
+.pill{font-size:12px;padding:5px 12px;border:1px solid rgba(255,255,255,.28);
+border-radius:999px;color:#D4EEE4;background:rgba(255,255,255,.06)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+padding:24px;margin:16px 0;box-shadow:0 2px 4px -1px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
+h1{font-size:30px;margin:8px 0 6px;letter-spacing:-.4px}
+h2{font-size:19px;margin:0 0 12px;letter-spacing:-.2px}
+h3{font-size:14px;margin:18px 0 8px;color:var(--gold)}
+p.sub{color:var(--mut);margin:0 0 18px}
+button{background:var(--forest);color:#fff;border:0;border-radius:10px;
+padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit}
+button.ghost{background:transparent;color:var(--gold);border:1.5px solid var(--line)}
+header button.ghost{color:#D4EEE4;border-color:rgba(255,255,255,.28)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{width:100%;background:#fff;border:1.5px solid var(--line);
+color:var(--ink);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);
+box-shadow:0 0 0 3px rgba(76,126,255,.15)}
+textarea{min-height:150px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.role{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+padding:22px;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.role:hover{border-color:var(--gold);transform:translateY(-2px);
+box-shadow:0 8px 16px -4px rgba(0,0,0,.10)}
+.role .ic{font-size:26px}
+.role h3{margin:10px 0 6px;color:var(--ink);font-size:17px}
+.role p{color:var(--mut);font-size:13px;margin:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hide{display:none!important}
+.err{color:var(--red);font-size:13px;margin-top:10px;white-space:pre-wrap}
+.ok{color:var(--green)}
+.big{font-size:64px;font-weight:750;line-height:1;letter-spacing:-2px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.kv div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kv b{display:block;font-size:19px}
+.kv small{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td.mono,code{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.band{font-weight:700}
+.A{color:var(--green)}.B{color:var(--green)}.C{color:#B45309}
+.D{color:#D97706}.E{color:var(--red)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:14px 0 6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),#F59E0B,var(--green))}
+.note{background:var(--bg);border-left:3px solid var(--gold);padding:11px 14px;
+border-radius:0 10px 10px 0;font-size:13px;color:var(--mut);margin:12px 0}
+.note.bad{border-left-color:var(--red);background:#FEF2F2;color:#7F1D1D}
+.note.good{border-left-color:var(--green);background:#ECFDF5;color:#065F46}
+ul.tight{margin:8px 0;padding-left:18px}
+ul.tight li{margin:5px 0}
+.log{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;
+font-family:ui-monospace,Consolas,monospace;font-size:11px;white-space:pre-wrap;
+max-height:260px;overflow:auto;color:var(--mut)}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{background:transparent;border:1.5px solid var(--line);color:var(--mut)}
+.tabs button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);
+border-top-color:var(--gold);border-radius:50%;animation:s .8s linear infinite;
+vertical-align:-2px;margin-right:7px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media(max-width:640px){.wrap{padding:20px 14px 64px}h1{font-size:25px}.big{font-size:46px;letter-spacing:-1px}.card{padding:18px}header{padding:12px 14px;gap:8px;flex-wrap:wrap}.pill{font-size:11px;padding:4px 9px}.twocol{grid-template-columns:1fr!important}table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}textarea{min-height:120px}button{padding:10px 14px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px"><path d="M2 20L8.5 7l3.5 6 1.8-2.8L22 20H2z" fill="#D4EEE4"/><path d="M8.5 7l3.5 6 1.8-2.8L22 20H13.8z" fill="#D0FF71"/></svg> IBEX <span>CREDIT</span></div>
+  <div class="grow"></div>
+  <a href="/home" style="color:#D4EEE4;font-size:13px;text-decoration:none">Home</a>
+  <a href="/static/dashboard.html" style="color:#D4EEE4;font-size:13px;text-decoration:none">Dashboard</a>
+  <div class="pill" id="who">not signed in</div>
+  <button class="ghost hide" id="btnOut">Sign out</button>
+</header>
+
+<div class="wrap">
+
+<!-- ================= WELCOME ================= -->
+<section id="pWelcome">
+  <h1>Credit scoring from open banking, anchored on chain.</h1>
+  <p class="sub">A score built from 24 months of real transaction history, with
+  its integrity provable by anyone the applicant chooses to show it to &mdash;
+  and by nobody else.</p>
+  <div class="roles">
+    <div class="role" data-role="individual">
+      <div class="ic">&#128100;</div><h3>Individual</h3>
+      <p>Connect your bank, get a score, see exactly what is holding it back.</p>
+    </div>
+    <div class="role" data-role="business">
+      <div class="ic">&#127970;</div><h3>Business</h3>
+      <p>Verify a score someone has shown you against the blockchain record.
+      No account needed.</p>
+    </div>
+    <div class="role" data-role="admin">
+      <div class="ic">&#128202;</div><h3>Admin</h3>
+      <p>Score cohorts from the held-out evaluation slice and inspect model
+      behaviour.</p>
+    </div>
+  </div>
+  <div class="note">Nothing identifiable is written to the blockchain. Only a
+  hash of a hash. A business cannot look you up &mdash; you have to hand them
+  the evidence yourself.</div>
+</section>
+
+<!-- ================= AUTH ================= -->
+<section id="pAuth" class="hide">
+  <div class="card" style="max-width:440px;margin:40px auto">
+    <h2 id="authTitle">Sign in</h2>
+    <div class="tabs">
+      <button id="tabIn" class="on">Sign in</button>
+      <button id="tabUp">Create account</button>
+    </div>
+    <label>Email</label><input id="aEmail" type="email" autocomplete="username">
+    <div id="nameWrap" class="hide">
+      <label>Name</label><input id="aName">
+    </div>
+    <label>Password</label>
+    <input id="aPass" type="password" autocomplete="current-password">
+    <div class="row" style="margin-top:16px">
+      <button id="aGo">Continue</button>
+      <button class="ghost" id="aBack">Back</button>
+    </div>
+    <div class="err" id="aErr"></div>
+  </div>
+</section>
+
+<!-- INDIVIDUAL -->
+<section id="pUser" class="hide">
+  <div class="card" id="connectCard">
+    <h2>Connect your bank</h2>
+    <p class="sub">We request 24 months of transaction history. Your bank
+    authenticates you directly &mdash; Ibex never sees your credentials.</p>
+    <div id="declaredBox" style="margin:14px 0 16px;padding:16px;border:1px solid #E5E7EB;border-radius:12px;background:#F9FAFB;text-align:left">
+      <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:4px">Before you connect <span style="color:#6B7280;font-weight:400">(optional, ~20 seconds)</span></div>
+      <p class="sub" style="margin:0 0 10px;font-size:12px;line-height:1.45">Three declarations improve your score's accuracy. Declared income is cross-checked against what your bank shows. Prefer not to say is fine &mdash; unanswered fields are treated as <i>missing</i>, never as a fabricated default.</p>
+      <div class="twocol" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label style="margin:0">Monthly income before tax (&pound;)
+          <input id="dSal" type="number" min="0" step="50" placeholder="e.g. 2500"></label>
+        <label style="margin:0">Employment tenure
+          <select id="dEmp">
+            <option value="" selected>Prefer not to say</option>
+            <option value="MORE_ONE_YEAR">Employed &gt; 1 year</option>
+            <option value="LESS_ONE_YEAR">Employed &lt; 1 year</option>
+            <option value="SELF_EMPLOYED">Self-employed</option>
+            <option value="RETIRED">Retired</option>
+            <option value="UNEMPLOYED">Not currently employed</option>
+          </select></label>
+        <label style="margin:0">Income type
+          <select id="dInc">
+            <option value="" selected>Prefer not to say</option>
+            <option value="SALARIED">Salaried employment</option>
+            <option value="SELF_EMPLOYED_INCOME">Self-employed income</option>
+            <option value="PENSION">Pension</option>
+            <option value="BENEFITS">State benefits</option>
+            <option value="OTHER">Other</option>
+          </select></label>
+      </div>
+      <p class="sub" style="margin:10px 0 0;font-size:11px">We ask nothing about education or housing &mdash; education was removed as a fairness precaution, and housing added no predictive power once your bank history is known.</p>
+    </div>
+    <button id="btnConnect">Connect bank account</button>
+    <div class="note">This takes 30&ndash;60 seconds. Five accounts, roughly
+    18,000 transactions, fetched in 180-day chunks because that is the
+    provider limit.</div>
+  </div>
+
+  <div class="card hide" id="scoreCard">
+    <h2>Your credit score</h2>
+    <div class="row" style="align-items:flex-end;gap:18px">
+      <div class="big" id="sVal">--</div>
+      <div><div class="band" id="sBand">--</div>
+      <small style="color:var(--mut)">Probability of default
+      <b id="sPd">--</b></small></div>
+    </div>
+    <div class="bar"><i id="sBar" style="width:0%"></i></div>
+    <div class="row" style="justify-content:space-between;font-size:11px;color:var(--mut)">
+      <span>300</span><span>540 E/D</span><span>600 C</span>
+      <span>660 B</span><span>720 A</span><span>900</span>
+    </div>
+    <div id="sPrev" style="color:var(--mut);font-size:13px;margin-top:8px"></div>
+    <div class="kv">
+      <div><small>Detected monthly income</small><b id="kIncome">--</b></div>
+      <div><small>Credit lines found</small><b id="kLines">--</b></div>
+      <div><small>Months of history</small><b id="kHist">--</b></div>
+      <div><small>Model features</small><b id="kFeat">--</b></div>
+    </div>
+    <div id="nameNote"></div>
+  </div>
+
+  <div class="card hide" id="issueCard">
+    <h2>What is holding your score back</h2>
+    <p class="sub">Ranked by the model's own contribution to your result.</p>
+    <div id="issues"></div>
+    <h3>Working in your favour</h3>
+    <div id="goods"></div>
+  </div>
+
+  <div class="card hide" id="evCard">
+    <h2>How certain is this score?</h2>
+    <p class="sub">A score without an interval is a point estimate pretending
+    to be a fact.</p>
+    <div id="evBody"></div>
+  </div>
+
+  <div class="card hide" id="chainCard">
+    <h2>Blockchain record</h2>
+    <div id="chainBody"></div>
+  </div>
+</section>
+
+<!-- BUSINESS -->
+<!-- ADMIN -->
+<section id="pAdmin" class="hide">
+  <h1>Cohort testing</h1>
+  <p class="sub">Applicants drawn at random from the held-out evaluation
+  slice, where the true outcome is known.</p>
+
+  <div class="card">
+    <div class="row">
+      <div style="width:110px"><label>How many</label>
+        <input id="coN" type="number" value="50" min="1" max="500"></div>
+      <div style="width:110px"><label>Seed</label>
+        <input id="coSeed" type="number" value="42"></div>
+      <div style="align-self:flex-end"><button id="btnCohort">Run cohort</button></div>
+      <div style="align-self:flex-end">
+        <button class="ghost" id="btnDiag">Check calibrator</button></div>
+    </div>
+    <div class="err" id="coErr"></div>
+    <div id="diagBox"></div>
+  </div>
+
+  <div class="card hide" id="coCard">
+    <h2>Results</h2>
+    <div id="coSummary"></div>
+    <table><thead><tr>
+      <th>#</th><th>Score</th><th>Band</th><th>PD</th><th>File description</th>
+      <th>Oblig</th><th>Max DPD</th><th>DTI</th><th>Income</th><th>Outcome</th>
+    </tr></thead><tbody id="coBody"></tbody></table>
+  </div>
+</section>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let ROLE="individual", ME=null;
+
+async function api(url,opt){
+  const r=await fetch(url,Object.assign({headers:{"Content-Type":"application/json"},credentials:"same-origin"},opt||{}));
+  let j=null; try{j=await r.json()}catch(e){}
+  if(!r.ok) throw new Error((j&&(j.detail||j.message))||("HTTP "+r.status));
+  return j;
+}
+function show(id){["pWelcome","pAuth","pUser","pAdmin"].forEach(p=>$("#"+p).classList.add("hide"));$("#"+id).classList.remove("hide");}
+function fmtMoney(v){return v==null?"--":"\u00a3"+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+document.querySelectorAll(".role").forEach(el=>el.onclick=()=>{
+  ROLE=el.dataset.role;
+  if(ROLE==="business"){location.href="/static/business.html";return;}
+  if(ME){ROLE==="admin"?openAdmin():show("pUser");return;}
+  $("#authTitle").textContent=ROLE==="admin"?"Admin sign in":"Sign in";
+  show("pAuth");
+});
+$("#aBack").onclick=()=>show("pWelcome");
+
+let MODE="in";
+$("#tabIn").onclick=()=>{MODE="in";$("#tabIn").classList.add("on");$("#tabUp").classList.remove("on");$("#nameWrap").classList.add("hide");};
+$("#tabUp").onclick=()=>{MODE="up";$("#tabUp").classList.add("on");$("#tabIn").classList.remove("on");$("#nameWrap").classList.remove("hide");};
+
+$("#aGo").onclick=async()=>{
+  $("#aErr").textContent="";
+  const body={email:$("#aEmail").value.trim(),password:$("#aPass").value};
+  if(MODE==="up") body.name=$("#aName").value.trim();
+  try{
+    await api("/api/v3/auth/"+(MODE==="up"?"signup":"login"),{method:"POST",body:JSON.stringify(body)});
+    await boot(true);
+  }catch(e){$("#aErr").textContent=e.message;}
+};
+$("#btnOut").onclick=async()=>{try{await api("/api/v3/auth/logout",{method:"POST"})}catch(e){};ME=null;$("#btnOut").classList.add("hide");$("#who").textContent="not signed in";show("pWelcome");};
+
+async function boot(afterLogin){
+  try{
+    const s=await api("/api/v3/auth/session");
+    ME=s&&(s.user||s.email?s:null);
+    if(s&&s.email){ME=s;}else if(s&&s.user){ME=s.user;}
+  }catch(e){ME=null;}
+  if(ME&&(ME.email)){
+    $("#who").textContent=ME.email+(ME.is_admin?" (admin)":"");
+    $("#btnOut").classList.remove("hide");
+    if(afterLogin){ROLE==="admin"?openAdmin():show("pUser");}
+  }else{$("#who").textContent="not signed in";}
+  const p=new URLSearchParams(location.search);
+  const tl=p.get("tl");
+  if(tl){show("pUser");runScore(tl.replace(/^=+/,""));}
+}
+
+$("#btnConnect").onclick=async()=>{
+  try{
+    const r=await api("/api/v4/tl/connect-url");
+    const u=new URL(r.url,location.origin);
+    const g=id=>{const el=document.getElementById(id);return el?el.value.trim():"";};
+    u.searchParams.set("employment",g("dEmp"));
+    u.searchParams.set("income_type",g("dInc"));
+    if(g("dSal"))u.searchParams.set("stated_income",g("dSal"));
+    location.href=u.toString();
+  }
+  catch(e){alert(e.message);}
+};
+
+async function runScore(token){
+  $("#connectCard").innerHTML='<h2><span class="spin"></span>Fetching 24 months of history</h2><p class="sub">Five accounts, 180-day chunks. This takes up to a minute.</p>';
+  try{
+    const rec=await api("/api/v4/score/run",{method:"POST",body:JSON.stringify({token:token,months:24})});
+    paint(rec); loadEvidence(); autoAnchor();
+    // No redirect. This page owns the chain flow, so the score, the advice and
+    // the anchoring transaction id all land in one place.
+  }catch(e){
+    $("#connectCard").innerHTML='<h2>Could not score</h2><div class="err">'+esc(e.message)+'</div><button onclick="location.href=\'/ibex\'">Try again</button>';
+  }
+}
+
+function paint(rec){
+  $("#connectCard").classList.add("hide");
+  ["scoreCard","issueCard","evCard","chainCard"].forEach(i=>$("#"+i).classList.remove("hide"));
+  $("#sVal").textContent=Math.round(rec.score);
+  $("#sBand").textContent="Band "+rec.band;
+  $("#sBand").className="band "+rec.band;
+  $("#sPd").textContent=rec.pd==null?"--":(rec.pd*100).toFixed(1)+"%";
+  $("#sBar").style.width=Math.max(0,Math.min(100,(rec.score-300)/6))+"%";
+  $("#sPrev").textContent=rec.previous_score?("Previous score "+Math.round(rec.previous_score)):"";
+  $("#kIncome").textContent=fmtMoney(rec.income);
+  $("#kLines").textContent=rec.credit_lines==null?"--":rec.credit_lines;
+  $("#kHist").textContent=rec.months==null?"--":rec.months;
+  $("#kFeat").textContent=rec.n_features==null?"--":rec.n_features;
+
+  $("#nameNote").innerHTML=rec.bank_name_verified
+    ?'<div class="note good">Identity bound to the name your bank holds: <b>'+esc(rec.bank_name)+'</b>. The chain sees only a hash of it.</div>'
+    :'<div class="note bad">Your bank did not return an account-holder name, so this score is bound to your email address alone. That is weaker &mdash; it does not stop the same person scoring under several addresses.</div>';
+
+  const neg=rec.issues&&rec.issues.length?rec.issues:(rec.negative_factors||[]).map(f=>({title:f,detail:""}));
+  $("#issues").innerHTML=neg.length
+    ?'<ul class="tight">'+neg.map(i=>"<li><b>"+esc(i.title||i)+"</b>"+(i.actionable===false?' <span style="font-size:11px;text-transform:uppercase;letter-spacing:.03em;opacity:.6">not changeable right now</span>':"")+(i.detail?" &mdash; "+esc(i.detail):"")+"</li>").join("")+"</ul>"
+    :'<p class="sub">No material negative drivers were identified.</p>';
+  const pos=rec.positives&&rec.positives.length?rec.positives:(rec.positive_factors||[]).map(f=>({title:f,detail:""}));
+  $("#goods").innerHTML=pos.length
+    ?'<ul class="tight">'+pos.map(i=>"<li><b>"+esc(i.title||i)+"</b>"+(i.detail?" &mdash; "+esc(i.detail):"")+"</li>").join("")+"</ul>"
+    :'<p class="sub">None recorded.</p>';
+
+  if(rec.resolved_from) console.log("v4 resolved fields from:",rec.resolved_from,"payload keys:",rec.payload_keys);
+}
+
+async function loadEvidence(){
+  try{
+    const e=await api("/api/v4/evidence");
+    const F=(e.floor!=null?(e.floor*100).toFixed(2)+"%":"--");
+    if(!e.has_run||!e.gini){
+      $("#evBody").innerHTML=
+        '<div class="err" style="margin-bottom:12px"><b>Uncertainty has not been measured for the model currently being served.</b><br>'+
+        esc(e.message||"Run scripts/evidence_se.py with --json-out into the active artifacts folder.")+
+        "</div>"+
+        '<div class="kv"><div><small>Score ceiling</small><b>'+(e.ceiling||"--")+'</b><small>PD floor '+F+'</small></div></div>'+
+        '<div class="note">Figures from a previous model build are deliberately not shown here.</div>';
+      return;
+    }
+    const pt=(e.points||[]).map(function(p){return "<tr><td>"+p.score+"</td><td>"+(p.pd*100).toFixed(2)+"%</td><td>"+(p.pd_ci[0]*100).toFixed(2)+"% to "+(p.pd_ci[1]*100).toFixed(2)+"%</td><td>"+p.score_ci[0].toFixed(1)+" to "+p.score_ci[1].toFixed(1)+"</td></tr>";}).join("");
+    const prov="Measured on "+(e.n_eval?Number(e.n_eval).toLocaleString():"?")+" evaluation rows across "+(e.n_weeks_eval||"?")+" origination weeks, "+(e.replicates||0)+" replicates.";
+    $("#evBody").innerHTML=
+      '<div class="kv"><div><small>Gini</small><b>'+e.gini.point.toFixed(4)+'</b><small>95% CI '+e.gini.ci[0].toFixed(4)+" to "+e.gini.ci[1].toFixed(4)+'</small></div>'+
+      '<div><small>Block bootstrap SE</small><b>'+e.gini.se_block.toFixed(4)+'</b><small>design effect '+e.gini.design_effect+"x, iid SE "+e.gini.se_delong.toFixed(4)+'</small></div>'+
+      '<div><small>Score ceiling</small><b>'+(e.ceiling||"--")+'</b><small>PD floor '+F+'</small></div>'+
+      '<div><small>Tail evidence</small><b>'+e.tail.obs+'</b><small>'+e.tail.defaults+' defaults, CI '+e.tail.ci[0]+" to "+e.tail.ci[1]+'</small></div></div>'+
+      '<h3>Interval around your score</h3><table><thead><tr><th>Score</th><th>PD</th><th>PD 95%</th><th>Score 95%</th></tr></thead><tbody>'+pt+'</tbody></table>'+
+      '<h3>Read this before quoting any of it</h3><ul class="tight">'+(e.caveats||[]).map(function(c){return "<li>"+esc(c)+"</li>";}).join("")+'</ul>'+
+      '<div class="note">'+esc(prov)+'</div>';
+  }catch(err){$("#evBody").innerHTML='<div class="err">'+esc(err.message)+'</div>';}
+}
+
+async function autoAnchor(){
+  $("#chainBody").innerHTML='<span class="spin"></span>Anchoring to chain...';
+  try{
+    const r=await api("/api/v3/chain/submit",{method:"POST",body:JSON.stringify({dry_run:false})});
+    const h=r.hashes||{};
+    const tx=h.txHash||"";
+    const txUrl=(r.links&&r.links.transaction)?r.links.transaction:"";
+    const txBox=tx?('<div class="note"><small>TRANSACTION ID &mdash; give this to a business, with your name, email and score, so they can verify it</small><div class="mono" style="font-size:13px;word-break:break-all;margin:6px 0 8px">'+esc(tx)+'</div>'+(txUrl?'<a target="_blank" rel="noopener" href="'+esc(txUrl)+'">View this transaction on Polygonscan</a>':"")+'</div>'):"";
+    const labels={txHash:"Transaction id",userHash:"Identity reference",scoreEventHash:"Score event hash",merkleRoot:"Merkle root",modelVersionHash:"Model version hash"};
+    const order=["txHash","userHash","scoreEventHash","merkleRoot","modelVersionHash"];
+    const rows=order.filter(k=>h[k]).map(k=>"<tr><td>"+esc(labels[k])+'</td><td class="mono">'+esc(h[k])+"</td></tr>").join("");
+    $("#chainBody").innerHTML='<div class="note good">Anchored on '+esc(r.network||"chain")+'.</div>'+txBox+"<table>"+rows+"</table>"+
+      (r.explorer?'<p><a target="_blank" href="'+esc(r.explorer)+'">View contract on the explorer</a></p>':"");
+  }catch(e){
+    $("#chainBody").innerHTML='<div class="note bad">Not anchored: '+esc(e.message)+'</div>';
+  }
+}
+
+function openAdmin(){show("pAdmin");}
+$("#btnDiag").onclick=async()=>{
+  try{
+    const d=await api("/api/v4/diag/calibrator");
+    $("#diagBox").innerHTML='<div class="note '+(d.is_production?"good":"bad")+'">Calibration path: <b>'+esc(d.path)+"</b><br>PD floor "+esc(d.pd_floor)+" &rarr; ceiling score "+esc(d.ceiling_score)+(d.is_production?"":"<br>NOT the production path -- cohort scores will not match the live dashboard.")+"</div>";
+  }catch(e){$("#diagBox").innerHTML='<div class="err">'+esc(e.message)+"</div>";}
+};
+$("#btnCohort").onclick=async()=>{
+  $("#coErr").textContent="";
+  try{
+    await api("/api/v4/admin/cohort?refresh=true&n="+encodeURIComponent($("#coN").value)+"&seed="+encodeURIComponent($("#coSeed").value));
+    poll();
+  }catch(e){$("#coErr").textContent=e.message;}
+};
+async function poll(){
+  try{
+    const s=await api("/api/v4/admin/cohort/status");
+    if(s.status==="loading"){$("#coErr").innerHTML='<span class="spin"></span>'+esc(s.message);return setTimeout(poll,2500);}
+    if(s.status==="error"){$("#coErr").textContent=s.message;return;}
+    $("#coErr").textContent="";draw(s);
+  }catch(e){$("#coErr").textContent=e.message;}
+}
+function draw(s){
+  const su=s.summary||{};
+  $("#coCard").classList.remove("hide");
+  const bands=Object.keys(su.bands||{}).sort().map(b=>b+": "+su.bands[b]).join(" \u00b7 ");
+  const warn=su.pct_at_ceiling>=20;
+  $("#coSummary").innerHTML='<div class="kv"><div><small>Scored</small><b>'+su.n+'</b></div>'+
+    '<div><small>Distinct scores</small><b>'+su.distinct_scores+'</b></div>'+
+    '<div><small>At the ceiling</small><b>'+su.at_ceiling+" ("+su.pct_at_ceiling+'%)</b></div>'+
+    '<div><small>Actually defaulted</small><b>'+su.defaults+'</b></div></div>'+
+    '<div class="note">Bands &mdash; '+esc(bands)+"<br>Calibration path: "+esc(su.calibrator)+"</div>"+
+    (warn?'<div class="note bad">'+su.pct_at_ceiling+'% of this cohort sits on the ceiling. That is the PD floor, not the model. With '+"zero defaults in the tail there is no evidence to separate the best applicants from one another, so they are pooled."+'</div>':"");
+  $("#coBody").innerHTML=(s.rows||[]).map(r=>"<tr><td>"+r.n+"</td><td><b>"+r.score+'</b></td><td class="band '+r.band+'">'+r.band+"</td><td>"+(r.pd*100).toFixed(2)+"%</td><td>"+esc(r.profile)+"</td><td>"+esc(r.oblig)+"</td><td>"+esc(r.max_dpd)+"</td><td>"+(r.dti==null?"":r.dti)+"</td><td>"+(r.income==null?"":Math.round(r.income))+"</td><td>"+(r.defaulted?'<span style="color:var(--red)">defaulted</span>':"repaid")+"</td></tr>").join("");
+}
+
+boot(false);
+</script>
+</div>
+  <script src="/static/ibex_intervals.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "ibex-smart-contract-demo-v2",
+  "version": "2.0.0",
+  "description": "Protected V2 of the Ibex Credit Polygon score audit registry.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "demo": "hardhat run scripts/demoLocalFlow.js",
+    "wallet:amoy": "hardhat run scripts/checkWallet.js --network amoy",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network amoy",
+    "submit:amoy": "hardhat run scripts/submitScoreRoot.js --network amoy",
+    "read:amoy": "hardhat run scripts/readLatestRecord.js --network amoy",
+    "verify:amoy": "hardhat run scripts/verifyScoreEvent.js --network amoy",
+    "admin:amoy": "hardhat run scripts/manageRegistry.js --network amoy",
+    "wallet:polygon": "hardhat run scripts/checkWallet.js --network polygon",
+    "estimate:polygon": "hardhat run scripts/estimateDeployment.js --network polygon",
+    "inspect:polygon": "hardhat run scripts/inspectRegistry.js --network polygon",
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
+    "submit:polygon": "hardhat run scripts/submitScoreRoot.js --network polygon",
+    "read:polygon": "hardhat run scripts/readLatestRecord.js --network polygon",
+    "verify:polygon": "hardhat run scripts/verifyScoreEvent.js --network polygon",
+    "admin:polygon": "hardhat run scripts/manageRegistry.js --network polygon"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.0.2",
+    "dotenv": "16.4.7",
+    "ethers": "6.14.0",
+    "merkletreejs": "0.3.11"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "5.0.0",
+    "hardhat": "2.28.0"
+  }
+}

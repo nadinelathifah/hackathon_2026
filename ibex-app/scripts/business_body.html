@@ -1,0 +1,107 @@
+<body>
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 20L8.5 7l3.5 6 1.8-2.8L22 20H2z" fill="white"/><path d="M8.5 7l3.5 6 1.8-2.8L22 20H13.8z" fill="var(--lime-500)"/></svg></div>
+    <span class="nav-logo-text">Ibex Credit</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="/static/blockchain-proof.html">Security</a>
+    <a class="nav-link" href="/static/model.html">The model</a>
+    <a class="nav-link active" href="/static/business.html">For businesses</a>
+  </div>
+  <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <a href="/static/signup.html" class="btn btn-secondary btn-medium">Run the demo</a>
+</nav>
+
+<header class="bz-hero">
+  <div class="bz-wrap">
+    <p class="bz-eyebrow">For businesses</p>
+    <h1>Check that a credential really came from Ibex</h1>
+    <p class="bz-lede">A customer has shown you a score. This page tells you whether Ibex issued it, whether it has been altered since, and whether it is bound to the name their bank holds. No account needed.</p>
+  </div>
+</header>
+
+<main class="bz-wrap bz-main">
+
+  <div class="bz-tabs" role="tablist">
+    <button class="bz-tab active" role="tab" data-pane="pane-details">By customer details</button>
+    <button class="bz-tab" role="tab" data-pane="pane-file">By score file</button>
+    <button class="bz-tab" role="tab" data-pane="pane-hash">By reference</button>
+  </div>
+
+  <section id="pane-details" class="card bz-pane">
+    <h2>Verify by customer details</h2>
+    <p class="bz-help">Enter the details exactly as the customer gave them. Ibex recomputes the pseudonymous reference from the name their bank returned and reads the matching record from the contract.</p>
+    <div class="bz-grid">
+      <div class="field">
+        <label class="field-label" for="d-name">Full name, as held by their bank</label>
+        <input class="field-input" id="d-name" type="text" placeholder="Joseph James Harding" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="d-email">Email they signed up with</label>
+        <input class="field-input" id="d-email" type="email" placeholder="name@example.com" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="d-score">Score they are claiming</label>
+        <input class="field-input" id="d-score" type="number" min="300" max="850" step="1" placeholder="610">
+      </div>
+      <div class="field">
+        <label class="field-label" for="d-band">Band <span class="bz-opt">optional</span></label>
+        <select class="field-input" id="d-band">
+          <option value="">Not stated</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-large" id="go-details">Verify against the chain</button>
+  </section>
+
+  <section id="pane-file" class="card bz-pane" hidden>
+    <h2>Verify by score file</h2>
+    <p class="bz-help">If the customer exported <code>score-event.json</code>, paste it here. This is the strongest check: the whole record is hashed and compared with the anchored hash.</p>
+    <div class="field">
+      <label class="field-label" for="f-json">score-event.json</label>
+      <textarea class="field-input bz-mono" id="f-json" rows="9" placeholder="{&quot;userId&quot;: &quot;...&quot;, &quot;newScore&quot;: 610, ...}"></textarea>
+    </div>
+    <button class="btn btn-primary btn-large" id="go-file">Verify file</button>
+  </section>
+
+  <section id="pane-hash" class="card bz-pane" hidden>
+    <h2>Verify by reference</h2>
+    <p class="bz-help">The customer can share their pseudonymous reference without revealing anything else. It looks like 0x followed by 64 characters.</p>
+    <div class="field">
+      <label class="field-label" for="h-hash">Reference</label>
+      <input class="field-input bz-mono" id="h-hash" type="text" placeholder="0x0000..." autocomplete="off">
+    </div>
+    <button class="btn btn-primary btn-large" id="go-hash">Read the record</button>
+  </section>
+
+  <section id="result" class="bz-result" hidden></section>
+
+  <section class="bz-claims">
+    <div class="card">
+      <h3>What a match proves</h3>
+      <ul class="bz-ul">
+        <li>Ibex issued this score, and the figure has not been edited since it was anchored.</li>
+        <li>It is bound to the name the customer's bank returned over open banking, not a name they typed in.</li>
+        <li>You can see when it was issued and which model version produced it.</li>
+      </ul>
+    </div>
+    <div class="card bz-warn">
+      <h3>What it does not prove</h3>
+      <ul class="bz-ul">
+        <li>That the person in front of you is the subject of the credential. That needs a signed wallet challenge, which Ibex does not yet issue.</li>
+        <li>That the customer is creditworthy today. A score is a point-in-time estimate, not a lending decision.</li>
+        <li>Anything about their finances. Only hashes reach the chain.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="bz-footer">
+  <span>Ibex Credit</span>
+  <span>Verification is pull-based and consent-first.</span>
+</footer>
+</body>
+</html>
